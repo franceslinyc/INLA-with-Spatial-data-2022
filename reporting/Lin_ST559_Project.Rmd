@@ -20,6 +20,9 @@ INLA is a fast alternative to MCMC for a class of LGMs (latent Gaussian Models).
 
 INLA is both faster and more accurate than MCMC alternatives. 
 
+
+
+
 ## Notation 
 
 ### Bayesian Inference 
@@ -48,9 +51,15 @@ GMRFs
 
 ## INLA 
 
+
+
+
 ## Applications 
 
 Spatial applications that utilize the `R` package `R-INLA` have been found in a wide variety of fields such as environment, ecology, disease mapping, cancer research, medical imaging, energy, economics, and risk analysis to name a few. Recent examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling fish populations that are recovering (Boudreau et al., 2017); mapping gender-disaggregated development indicators (Bosco et al., 2017); environmental mapping of soil (Huang et al., 2017); changes in fish distributions (Thorson et al., 2017); febrile illness in children (Dalrymple et al., 2017); dengue disease in Malaysia (Naeeim and Rah- man, 2017); modelling pancreatic cancer mortality in Spain (Etxeberria et al., 2017); soil properties in forest (Beguin et al., 2017); ethanol and gasoline pricing (Laurini, 2017); fish diversity (Fonseca et al., 2017); a spatial model of unemployment (Pereira et al., 2017); distance sampling of blue whales (Yuan et al., 2017); settlement patterns and reproductive success of prey (Morosinotto et al., 2017); cortical surface fMRI data (Mejia et al., 2017); distribution and drivers of bird species richness (Dyer et al., 2017); socio-environmental factors in influenza-like illness (Lee et al., 2017); global distributions of Lygodium microphyllum under projected climate warming (Humphreys et al., 2017); logging and hunting impacts on large animals (Roopsind et al., 2017); socio demographic and geographic impact of HPV vaccination (Rutten et al., 2017); a combined analysis of point and area level data (Moraga et al., 2017); probabilistic prediction of wind power (Lenzi et al., 2017); animal tuberculosis (Gortazar et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); detecting local overfishing (Carson et al., 2017); joint modelling of presence-absence and abundance of hake (Paradinas et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); modeling landslides as point processes (Lombardo et al., 2018); comparing avian influenza virus in Vietnamese live bird markets (Mellor et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), et cetera.
+
+
+
 
 ## Reference
 
