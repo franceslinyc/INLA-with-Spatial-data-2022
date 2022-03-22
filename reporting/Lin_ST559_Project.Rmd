@@ -1,0 +1,63 @@
+---
+title: "INLA"
+author: "Frances Lin"
+date: "June 2022"
+output: pdf_document
+header-includes: \usepackage{setspace}\onehalfspacing
+---
+
+## Background and Introduction 
+
+The steps involving the Bayesian inference appear easy and straightforward: updating prior believes about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, et cetera. can be computed (Rue et al., 2017). However, this is much harder to do in practice. 
+
+Then, the simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) *(The Casella!)* in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has become popular. 
+
+However, 
+
+As a result, 
+
+INLA is a fast alternative to MCMC for a class of LGMs (latent Gaussian Models). 
+
+INLA is both faster and more accurate than MCMC alternatives. 
+
+## Notation 
+
+### Bayesian Inference 
+
+The posterior distribution is proportional to the likelihood function multiples by the prior distribution **(Need citation)** 
+
+$$
+f(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} \propto p(y|\theta) p(\theta), 
+$$
+where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. 
+
+
+### Latent Gaussian Models
+
+LGMs
+
+### Additive Models
+
+### Gaussian Markov Random Fields
+
+GMRFs
+
+### Additive Models and Gaussian Markov Random Fields
+
+### Laplace Approximations 
+
+## INLA 
+
+## Applications 
+
+Spatial applications that utilize the `R` package `R-INLA` have been found in a wide variety of fields such as environment, ecology, disease mapping, cancer research, medical imaging, energy, economics, and risk analysis to name a few. Recent examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling fish populations that are recovering (Boudreau et al., 2017); mapping gender-disaggregated development indicators (Bosco et al., 2017); environmental mapping of soil (Huang et al., 2017); changes in fish distributions (Thorson et al., 2017); febrile illness in children (Dalrymple et al., 2017); dengue disease in Malaysia (Naeeim and Rah- man, 2017); modelling pancreatic cancer mortality in Spain (Etxeberria et al., 2017); soil properties in forest (Beguin et al., 2017); ethanol and gasoline pricing (Laurini, 2017); fish diversity (Fonseca et al., 2017); a spatial model of unemployment (Pereira et al., 2017); distance sampling of blue whales (Yuan et al., 2017); settlement patterns and reproductive success of prey (Morosinotto et al., 2017); cortical surface fMRI data (Mejia et al., 2017); distribution and drivers of bird species richness (Dyer et al., 2017); socio-environmental factors in influenza-like illness (Lee et al., 2017); global distributions of Lygodium microphyllum under projected climate warming (Humphreys et al., 2017); logging and hunting impacts on large animals (Roopsind et al., 2017); socio demographic and geographic impact of HPV vaccination (Rutten et al., 2017); a combined analysis of point and area level data (Moraga et al., 2017); probabilistic prediction of wind power (Lenzi et al., 2017); animal tuberculosis (Gortazar et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); detecting local overfishing (Carson et al., 2017); joint modelling of presence-absence and abundance of hake (Paradinas et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); modeling landslides as point processes (Lombardo et al., 2018); comparing avian influenza virus in Vietnamese live bird markets (Mellor et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), et cetera.
+
+## Reference
+
+[Bakka, H., Rue, H., Fuglstad, G. A., Riebler, A., Bolin, D., Illian, J., Krainski, E., & Lindgren, F. (2018). Spatial modeling with R‐INLA: A review. Wiley Interdisciplinary Reviews: Computational Statistics, 10(6), e1443.](https://arxiv.org/pdf/1802.06350.pdf)
+
+Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. [https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
+
+[Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.](https://www.annualreviews.org/doi/full/10.1146/annurev-statistics-060116-054045?casa_token=sIho3hU0GtwAAAAA:hAwMg1zvZyqaxk00jCdYyQFfzc5pDwOz5hKK1AzVjjnIY6CANQ8YWbaCC0EQk-5UteoMDy-aHnUI)
+
+
