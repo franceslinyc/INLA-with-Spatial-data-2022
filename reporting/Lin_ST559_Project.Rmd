@@ -8,9 +8,9 @@ header-includes: \usepackage{setspace}\onehalfspacing
 
 ## Background and Introduction 
 
-The steps involving the Bayesian inference appear easy and straightforward: updating prior believes about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, et cetera. can be computed (Rue et al., 2017). However, this is much harder to do in practice. 
+The steps involving the Bayesian inference may appear easy and straightforward: updating prior believes about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed form may not be determined. 
 
-Then, the simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) *(The Casella!)* in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has become popular. 
+Then, the simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has become popular. 
 
 However, 
 
@@ -34,12 +34,66 @@ f(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} 
 $$
 where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. 
 
+Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained (Rue et al., 2017).
+
+However, the integral is generally intractable, thus requiring the use of numerical methods such as MCMC. 
 
 ### Latent Gaussian Models
 
-LGMs
+The latent Gaussian Models (LGMs) is a class of three-state Bayesian hierarchical models. 
+
+Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters) and hyperparameters $\theta_1$: 
+
+$$
+y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ _{likelihood}
+$$
+
+The versatility of the model class can be specified through the latent Gaussian field: 
+$$
+x | \theta_2 \sim N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
+$$
+where the precision matrix $Q^{-1} = \Sigma$, which captures the underlying dependence structure of the data. 
+
+The hyperparameters of the non-Gaussian latent field: 
+
+$$
+\theta = {(\theta_1, \theta_2)} \sim p(\theta) \ \ \ \ \ _{hyperpriors}
+$$
+
+controls the latent Gaussian field and/or the likelihood of the data. 
+
+The posterior becomes: 
+
+$$
+p(x, \theta | y) \propto p(\theta) p(x | \theta) \prod_{i \in I} p(y_i | x_i, \theta).
+$$
+
+The following assumptions are needed for computational reasons and to ensure accurate approximations: 
+
+1. The number of hyperparameters $\theta$ is small (~ $2$ to $5$ but $< 20$).
+
+2. The distribution of the latent field is Gaussian and is close to a Gaussian Markov random field (GMRF) when $n$ is high ($10^3$ to $10^5$).  
+
+3. Each observation $y_i$ depends only on one component of the latent field $x_i$, and most components of $x$ will not be observed. 
+
+
 
 ### Additive Models
+
+LGMS are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear model setup, for example,
+
+$$
+y \sim \prod_i^N p(y_i | x_i, \theta)
+$$
+
+$$
+g(\mu_i) = \eta_i = \alpha + \sum_j \beta_j z_{ij} + \sum_k f_{k, jk(i)},
+$$
+where $\alpha$ is the overall intercept, $z$ are fixed predictors with linear effects $\{\beta_j\}$ and $\{f_k\}$ represents specific Gaussian processes such as random effects, spatially or temporally correlated effects, smoothing splines, measure errors, etc.
+
+
+
+
 
 ### Gaussian Markov Random Fields
 
@@ -56,10 +110,14 @@ GMRFs
 
 ## Applications 
 
-Spatial applications that utilize the `R` package `R-INLA` have been found in a wide variety of fields such as environment, ecology, disease mapping, cancer research, medical imaging, energy, economics, and risk analysis to name a few. Recent examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling fish populations that are recovering (Boudreau et al., 2017); mapping gender-disaggregated development indicators (Bosco et al., 2017); environmental mapping of soil (Huang et al., 2017); changes in fish distributions (Thorson et al., 2017); febrile illness in children (Dalrymple et al., 2017); dengue disease in Malaysia (Naeeim and Rah- man, 2017); modelling pancreatic cancer mortality in Spain (Etxeberria et al., 2017); soil properties in forest (Beguin et al., 2017); ethanol and gasoline pricing (Laurini, 2017); fish diversity (Fonseca et al., 2017); a spatial model of unemployment (Pereira et al., 2017); distance sampling of blue whales (Yuan et al., 2017); settlement patterns and reproductive success of prey (Morosinotto et al., 2017); cortical surface fMRI data (Mejia et al., 2017); distribution and drivers of bird species richness (Dyer et al., 2017); socio-environmental factors in influenza-like illness (Lee et al., 2017); global distributions of Lygodium microphyllum under projected climate warming (Humphreys et al., 2017); logging and hunting impacts on large animals (Roopsind et al., 2017); socio demographic and geographic impact of HPV vaccination (Rutten et al., 2017); a combined analysis of point and area level data (Moraga et al., 2017); probabilistic prediction of wind power (Lenzi et al., 2017); animal tuberculosis (Gortazar et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); detecting local overfishing (Carson et al., 2017); joint modelling of presence-absence and abundance of hake (Paradinas et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); modeling landslides as point processes (Lombardo et al., 2018); comparing avian influenza virus in Vietnamese live bird markets (Mellor et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), et cetera.
+The `R` package `R-INLA` have found spatial applications in a wide variety of fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc. 
+
+Some selected examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
 
 
 
+
+\newpage
 
 ## Reference
 
