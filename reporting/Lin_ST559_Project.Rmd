@@ -16,7 +16,7 @@ However,
 
 As a result, 
 
-INLA is a fast alternative to MCMC for a class of LGMs (latent Gaussian Models). 
+INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for a class of LGMs (latent Gaussian Models). 
 
 INLA is both faster and more accurate than MCMC alternatives. 
 
