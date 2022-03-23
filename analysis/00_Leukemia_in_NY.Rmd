@@ -5,3 +5,123 @@ date: "3/23/2022"
 output: pdf_document
 ---
 
+## Load packages
+
+```{r}
+# Load packages
+library(spdep)
+library(DClusterm) # data
+library(tidyverse)
+library(pander)
+library(ggplot2)
+```
+
+
+## The `NY8` data
+
+The `NY8` data set contains the number of leukemia cases in an eight-country region of upstate New York from 1978-1982. 
+
+```{r}
+# Load data
+data(NY8)
+
+# View data
+#head(NY8)
+NY8
+```
+
+```{r}
+# Check class
+class(NY8)
+```
+
+```{r}
+# Convert it to a df? 
+# https://www.paulamoraga.com/book-geospatial/sec-spatialdataandCRS.html
+head(NY8@data) %>% pander
+```
+
+```{r}
+# # Plot it 
+# plot(NY8) # Just the map now.
+```
+
+
+## Plotting 
+
+```{r}
+# Convert to sf
+library(sf)
+NY8_sf <- st_as_sf(NY8)
+```
+
+```{r}
+# Create the standardized mortality ratio (SMR) variable
+# https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/
+rate <- sum(NY8_sf$Cases) / sum(NY8_sf$POP8)
+
+NY8_sf <- NY8_sf %>% mutate(
+  Expected = POP8 * rate, 
+  SMR = Cases / Expected
+)
+```
+
+```{r}
+# Plot SMR 
+ggplot(NY8_sf) + geom_sf(aes(fill = SMR)) + # Look nice!
+  scale_fill_gradient(high="red") 
+```
+
+
+## Subsetting then plotting
+
+```{r}
+# Subset to include Syracuse city only 
+syracuse <- which(NY8$AREANAME == "Syracuse city")
+
+# Plot it
+ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = SMR)) + 
+  scale_fill_gradient(high="red") 
+```
+
+## Fitting a mixed-effects (Poisson regression) model 
+
+```{r}
+#install.packages("INLA") # run once
+#not available for this R version...
+#install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE) # load a while
+library(INLA) # now it works?
+```
+
+Let's work on some toy examples first before coming to fix the issue. 
+
+```{r}
+# # Fit a Poisson regression model
+# m1 <- inla(Cases ~ 1 + AVGIDIST,
+#            data = NY8_sf,
+#            family = "poisson",
+#            E = NY8_sf$Expected, 
+#            control.predictor = list(compute = TRUE),
+#            control.compute = list(dic = TRUE, waic = TRUE))
+```
+
+```{r}
+# # Fit a different model (random-effects model)
+# NY8_sf <- NY8_sf %>% mutate(
+#   ID = 1:nrow(NY8))
+# 
+# m2 <- inla(Cases ~ 1 + AVGIDIST + f(ID, model = "iid"),
+#   data = as.data.frame(NY8), family = "poisson", 
+#   E = NY8$Expected,
+#   control.predictor = list(compute = TRUE),
+#   control.compute = list(dic = TRUE, waic = TRUE))
+```
+
+
+
+\newpage
+
+
+## Reference 
+
+Gómez Rubio, Virgilio. (2019). R-bloggers. Spatial Data Analysis with INLA. [https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/.](https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/)
