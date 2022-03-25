@@ -10,7 +10,7 @@ header-includes: \usepackage{setspace}\onehalfspacing
 
 The steps involving the Bayesian inference may appear easy and straightforward: updating prior believes about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed form may not be determined. 
 
-Then, the simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has become popular. 
+The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was then introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has also become popular. 
 
 However, 
 
@@ -25,7 +25,7 @@ INLA is both faster and more accurate than MCMC alternatives.
 
 ## Notation 
 
-### Bayesian Inference 
+### 0. Bayesian Inference 
 
 The posterior distribution is proportional to the likelihood function multiples by the prior distribution **(Need citation)** 
 
@@ -36,39 +36,39 @@ where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${
 
 Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained (Rue et al., 2017).
 
-However, the integral is generally intractable, thus requiring the use of numerical methods such as MCMC. 
+However, the integral is generally intractable and requires the use of numerical methods such as MCMC. 
 
-### Latent Gaussian Models
+### 1. Latent Gaussian Models
 
-The latent Gaussian Models (LGMs) is a class of three-state Bayesian hierarchical models. 
+The latent Gaussian Models (LGMs) is a class of three-state Bayesian hierarchical models. It involves the following stages: 
 
-Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters) and hyperparameters $\theta_1$: 
+Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters) and hyperparameters $\theta_1$, 
 
 $$
 y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ _{likelihood}
 $$
 
-The versatility of the model class can be specified through the latent Gaussian field: 
+The versatility of the model class can be specified through the unobserved latent Gaussian field 
+
 $$
 x | \theta_2 \sim N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
 $$
-where the precision matrix $Q^{-1} = \Sigma$, which captures the underlying dependence structure of the data. 
+where the precision matrix $Q^{-1} = \Sigma$, which captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms). 
 
-The hyperparameters of the non-Gaussian latent field: 
-
-$$
-\theta = {(\theta_1, \theta_2)} \sim p(\theta) \ \ \ \ \ _{hyperpriors}
-$$
-
-controls the latent Gaussian field and/or the likelihood of the data. 
-
-The posterior becomes: 
+The hyperparameters of the non-Gaussian latent field,
 
 $$
-p(x, \theta | y) \propto p(\theta) p(x | \theta) \prod_{i \in I} p(y_i | x_i, \theta).
+\theta = {(\theta_1, \theta_2)} \sim p(\theta), \ \ \ \ \ _{hyperpriors}
+$$
+controls the likelihood of the data and/or the latent Gaussian field. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect. 
+
+Then the posterior distribution, structured in a hierarchical way, becomes 
+
+$$
+p(x, \theta | y) \propto \prod_{i \in I} p(y_i | x_i, \theta) p(x | \theta) p(\theta).
 $$
 
-The following assumptions are needed for computational reasons and to ensure accurate approximations: 
+For computational reasons and to ensure accurate approximations, we assume the following assumptions:  
 
 1. The number of hyperparameters $\theta$ is small (~ $2$ to $5$ but $< 20$).
 
@@ -78,7 +78,7 @@ The following assumptions are needed for computational reasons and to ensure acc
 
 
 
-### Additive Models
+### 2. Additive Models
 
 LGMS are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear model setup, for example,
 
@@ -87,21 +87,21 @@ y \sim \prod_i^N p(y_i | x_i, \theta)
 $$
 
 $$
-g(\mu_i) = \eta_i = \alpha + \sum_j \beta_j z_{ij} + \sum_k f_{k, jk(i)},
+g(\mu_i) = \eta_i = \alpha + \sum_j \beta_j z_{ji} + \sum_k f_{k}(w_{ki}) + \varepsilon_i,
 $$
-where $\alpha$ is the overall intercept, $z$ are fixed predictors with linear effects $\{\beta_j\}$ and $\{f_k\}$ represents specific Gaussian processes such as random effects, spatially or temporally correlated effects, smoothing splines, measure errors, etc.
+where $\alpha$ is the overall intercept, $\{\beta_j\}$ are linear effects of fixed covariates $z$, and $\{f_k\}$ are are used to represent specific Gaussian processes and are nonlinear/smooth effects of some covariates $w$. Examples of model components $f_k$ include random effects with different types of correlations, spatially or temporally correlated effects, smoothing and stochastic spline, and measure errors. 
+
+For GLMs (generalized linear models), the expression becomes $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). For GAMs (generalized additive models), the expression becomes $\alpha + \sum_k f_{k}(w_{k})$. 
 
 
 
-
-
-### Gaussian Markov Random Fields
+### 3. Gaussian Markov Random Fields
 
 GMRFs
 
-### Additive Models and Gaussian Markov Random Fields
+### 4. Additive Models and Gaussian Markov Random Fields
 
-### Laplace Approximations 
+### 5. Laplace Approximations 
 
 ## INLA 
 
@@ -122,6 +122,9 @@ Some selected examples include: environmental risk factors to liver Fluke in cat
 ## Reference
 
 [Bakka, H., Rue, H., Fuglstad, G. A., Riebler, A., Bolin, D., Illian, J., Krainski, E., & Lindgren, F. (2018). Spatial modeling with R‐INLA: A review. Wiley Interdisciplinary Reviews: Computational Statistics, 10(6), e1443.](https://arxiv.org/pdf/1802.06350.pdf)
+
+[Bolin, D. (2015). *Lecture 1: Introduction
+Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F1slides.pdf)
 
 Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. [https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
 
