@@ -124,4 +124,4 @@ Let's work on some toy examples first before coming to fix the issue.
 
 ## Reference 
 
-Gómez Rubio, Virgilio. (2019). R-bloggers. Spatial Data Analysis with INLA. [https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/.](https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/)
+Gómez-Rubio, V. (2019). R-bloggers. Spatial Data Analysis with INLA. [https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/.](https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/)
