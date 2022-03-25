@@ -5,7 +5,7 @@ Frances Lin
 
 Description:
 
-Expand the INLA (a fast alternative to MCMC for Bayesian inference) and include an example of leukemia incident cases using the **R** package `INLA`. 
+Expand the INLA algorithm (a fast alternative to MCMC methods for Bayesian inference) and include an example of leukemia incident cases using the **R** package `R-INLA`. 
 
 Documentation:
 
