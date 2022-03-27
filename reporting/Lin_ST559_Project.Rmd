@@ -42,7 +42,7 @@ However, the integral is generally intractable and requires the use of numerical
 
 The latent Gaussian Models (LGMs) is a class of three-state Bayesian hierarchical models. It involves the following stages: 
 
-Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters) and hyperparameters $\theta_1$, 
+Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameters $\theta$, 
 
 $$
 y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ _{likelihood}
@@ -51,16 +51,16 @@ $$
 The versatility of the model class can be specified through the unobserved latent Gaussian field 
 
 $$
-x | \theta_2 \sim N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
+x | \theta_2 \sim p(x | \theta_2) = N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
 $$
 where the precision matrix $Q^{-1} = \Sigma$, which captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms). 
 
-The hyperparameters of the non-Gaussian latent field,
+The hyperparameters of the latent field that is non-Gaussian, 
 
 $$
 \theta = {(\theta_1, \theta_2)} \sim p(\theta), \ \ \ \ \ _{hyperpriors}
 $$
-controls the likelihood of the data and/or the latent Gaussian field. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect. 
+contains the prior knowledge of the parameters and controls the likelihood of the data and/or the latent Gaussian field. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect. 
 
 Then the posterior distribution, structured in a hierarchical way, becomes 
 
@@ -70,17 +70,16 @@ $$
 
 For computational reasons and to ensure accurate approximations, we assume the following assumptions:  
 
-1. The number of hyperparameters $\theta$ is small (~ $2$ to $5$ but $< 20$).
+1. Each observation $y_i$ depends only on one component of the latent field $x_i$, and most components of $x$ will not be observed. 
 
-2. The distribution of the latent field is Gaussian and is close to a Gaussian Markov random field (GMRF) when $n$ is high ($10^3$ to $10^5$).  
+2. The distribution of the latent field $x$ is Gaussian and is close to a Gaussian Markov random field (GMRF) when $n$ is high ($10^3$ to $10^5$). 
 
-3. Each observation $y_i$ depends only on one component of the latent field $x_i$, and most components of $x$ will not be observed. 
-
+3. The number of hyperparameters $\theta$ is small (~ $2$ to $5$ but $< 20$). 
 
 
 ### 2. Additive Models
 
-LGMS are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear model setup, for example,
+LGMs are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear model setup, for example,
 
 $$
 y \sim \prod_i^N p(y_i | x_i, \theta)
@@ -89,15 +88,26 @@ $$
 $$
 g(\mu_i) = \eta_i = \alpha + \sum_j \beta_j z_{ji} + \sum_k f_{k}(w_{ki}) + \varepsilon_i,
 $$
-where $\alpha$ is the overall intercept, $\{\beta_j\}$ are linear effects of fixed covariates $z$, and $\{f_k\}$ are are used to represent specific Gaussian processes and are nonlinear/smooth effects of some covariates $w$. Examples of model components $f_k$ include random effects with different types of correlations, spatially or temporally correlated effects, smoothing and stochastic spline, and measure errors. 
+where $\alpha$ is the overall intercept, $\{\beta_j\}$ are linear effects of fixed covariates $z$, and $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$. Examples of model components $f_k$ include random effects with different types of correlations, spatially or temporally correlated effects, smoothing and stochastic spline, and measure errors. 
 
 For GLMs (generalized linear models), the expression becomes $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). For GAMs (generalized additive models), the expression becomes $\alpha + \sum_k f_{k}(w_{k})$. 
 
+The model is a LGM $iff$ the joint distribution of 
+
+$$
+x = (\eta, \alpha, \beta, f(\cdot))
+$$
+
+is Gaussian. This can be done by putting Gaussian priors on the intercept and the parameter of the fixed effects. 
+
+If we further assume conditional independence of $x$, then this latent field $x$ is a Gaussian Markov Random Field. 
 
 
 ### 3. Gaussian Markov Random Fields
 
 GMRFs
+
+The Markov assumption in the GMRFs results in a sparse precision matrix. 
 
 ### 4. Additive Models and Gaussian Markov Random Fields
 
