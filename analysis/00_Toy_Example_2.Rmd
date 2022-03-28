@@ -1,7 +1,7 @@
 ---
-title: "00_Toy_Examples"
+title: "00_Toy_Example_2"
 author: "Frances Lin"
-date: "3/23/2022"
+date: "3/27/2022"
 output: pdf_document
 ---
 
@@ -15,28 +15,23 @@ library(INLA)
 
 ```{r}
 N <- 100 # 500, 5000, 25000, 100000
-x <- rnorm(N, mean = 6, sd = 2)
-y <- rnorm(N, mean = x, sd = 1)
-data <- list(x = x, y = y, N = N)
+x <- rnorm(N, mean = 5, sd = 1)
+nu <- rnorm(N, 0, 0.1)
+mu <- exp(1 + 0.5 * x + nu)
+y <- rpois(N, mu)
+data <- list(x = x, y = y, N = N, nu = nu, mu = mu)
 ```
 
-## Fit a SLR model
- 
-```{r}
-# Measure running time of code
-# https://www.r-bloggers.com/2017/05/5-ways-to-measure-running-time-of-r-code/
-sleep_for_a_minute <- function() {Sys.sleep(60)}
-start_time <- Sys.time()
+## Fit the Poisson GLM
 
-# Fit a SLR model
-model <- inla(y ~ x,
-              family = "gaussian",
+```{r}
+# Fit the Poisson GLM
+nu <- 1:N
+model <- inla(y ~ x + f(nu, model = "iid"),
+              family = "poisson",
               data = data,
               control.predictor = list(link = 1)
 )
-
-end_time <- Sys.time()
-end_time - start_time
 ```
 
 ## Produce results summaries
@@ -50,6 +45,4 @@ summary(model)
 ## Reference
 
 Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. [https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
-
-
 
