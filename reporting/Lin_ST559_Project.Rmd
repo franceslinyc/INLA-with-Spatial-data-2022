@@ -8,19 +8,11 @@ header-includes: \usepackage{setspace}\onehalfspacing
 
 ## Background and Introduction     
 
-The steps involving the Bayesian inference may appear easy and straightforward: updating prior believes about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed form may not be determined. 
+The steps involving the Bayesian inference may appear easy and straightforward: updating prior believes about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not be determined. 
 
-The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was then introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has also become popular. 
+The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was then introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has gained popularity in many fields. However, these MCMC methods, based on sampling, not only are computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
 
-However, 
-
-As a result, 
-
-INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for a class of LGMs (latent Gaussian Models). 
-
-INLA is both faster and more accurate than MCMC alternatives. 
-
-
+INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for a class of LGMs (latent Gaussian models) that does not require sampling. I.e. INLA can be applied to a very wide and flexible class of models ranging from GLMM to spatial and spatio-temporal models, named LGMs. INLA allows for faster and more accurate inference without trading speed for accuracy, and it can be accessed through the **R** package `R-INLA`. 
 
 
 ## Notation 
@@ -36,11 +28,11 @@ where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${
 
 Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained (Rue et al., 2017).
 
-However, the integral is generally intractable and requires the use of numerical methods such as MCMC. 
+However, the integral is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
 
 ### 1. Latent Gaussian Models
 
-The latent Gaussian Models (LGMs) is a class of three-state Bayesian hierarchical models. It involves the following stages: 
+The latent Gaussian models (LGMs) is a class of three-state Bayesian hierarchical models. It involves the following stages: 
 
 Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameters $\theta$ 
 
