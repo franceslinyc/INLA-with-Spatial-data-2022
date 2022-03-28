@@ -1,0 +1,55 @@
+---
+title: "00_Toy_Examples"
+author: "Frances Lin"
+date: "3/23/2022"
+output: pdf_document
+---
+
+## Load packages
+
+```{r}
+library(INLA)
+```
+
+## Simulate the data
+
+```{r}
+N <- 100 # 500, 5000, 25000, 100000
+x <- rnorm(N, mean = 6, sd = 2)
+y <- rnorm(N, mean = x, sd = 1)
+data <- list(x = x, y = y, N = N)
+```
+
+## Fit a SLR model
+ 
+```{r}
+# Measure running time of code
+# https://www.r-bloggers.com/2017/05/5-ways-to-measure-running-time-of-r-code/
+sleep_for_a_minute <- function() {Sys.sleep(60)}
+start_time <- Sys.time()
+
+# Fit a SLR model
+model <- inla(y ~ x,
+  family = "gaussian",
+  data = data,
+  control.predictor = list(link = 1)
+)
+
+end_time <- Sys.time()
+end_time - start_time
+```
+
+## Produce results 
+
+```{r}
+summary(model)
+```
+
+\newpage
+
+## Reference
+
+Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. [https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
+
+
+
