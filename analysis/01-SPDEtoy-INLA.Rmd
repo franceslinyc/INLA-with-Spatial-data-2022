@@ -1,0 +1,8 @@
+---
+title: "01-SPDEtoy-INLA"
+author: "Frances Lin"
+date: "3/28/2022"
+output: pdf_document
+---
+
+Follow [this site](https://becarioprecario.bitbucket.io/spde-gitbook/ch-INLA.html#sec:INLAexample).

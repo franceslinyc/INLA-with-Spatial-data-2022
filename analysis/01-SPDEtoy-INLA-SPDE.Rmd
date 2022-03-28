@@ -1,0 +1,8 @@
+---
+title: "01-SPDEtoy-INLA-SPDE"
+author: "Frances Lin"
+date: "3/28/2022"
+output: pdf_document
+---
+
+Follow [this site](https://becarioprecario.bitbucket.io/spde-gitbook/ch-intro.html#sec:toyexample).
