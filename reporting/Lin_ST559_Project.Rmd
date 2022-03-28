@@ -52,7 +52,7 @@ The hyperparameters of the latent field that is not necessarily Gaussian
 $$
 \theta = {(\theta_1, \theta_2)} \sim p(\theta) \ \ \ \ \ _{hyperpriors}
 $$
-contains the prior knowledge of the parameters and can be used to account for variability and strength of dependence. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect. 
+control the likelihood for the data and/or the latent Gaussian field and can be used to account for variability and strength of dependence. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect. 
 
 Then, the posterior distribution, structured in a hierarchical way, becomes 
 
@@ -68,7 +68,7 @@ For computational reasons and to ensure accurate approximations, we assume the f
 
 1. Each observation $y_i$ depends only on one component of the latent field $x_i$, and most components of $x$ will not be observed. 
 
-2. The distribution of the latent field $x$ is Gaussian and is close to a Gaussian Markov random field (GMRF) when $n$ is high ($10^3$ to $10^5$). 
+2. The distribution of the latent field $x$ is Gaussian and is close to a Gaussian Markov random field (GMRF) when the $dim$ of $n$ is high ($10^3$ to $10^5$). 
 
 3. The number of hyperparameters $\theta$ is small (~ $2$ to $5$ but $< 20$). 
 
@@ -84,7 +84,7 @@ $$
 $$
 g(\mu_i) = \eta_i = \alpha + \sum_j \beta_j z_{ji} + \sum_k f_{k}(w_{ki}) + \varepsilon_i,
 $$
-where $\alpha$ is the overall intercept, $\beta$ are linear effects of fixed covariates $z$, $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$, and $\varepsilon$ are iid random effects. The model components $f_k$ are what make LGMs flexible. Examples of $f_k$ include random effects with different types of correlations, spatially or temporally correlated effects, smoothing and stochastic spline, and measure errors. 
+where $\alpha$ is the overall intercept, $\beta$ are linear effects of fixed covariates $z$, $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$, and $\varepsilon$ are iid random effects. The model components $f_k$ are what make LGMs flexible. Examples of $f_k$ include spatially or temporally correlated effects, smoothing and stochastic spline, measure errors, and random effects with different types of correlations. 
 
 *For GLMs (generalized linear models), the expression becomes $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). For GAMs (generalized additive models), the expression becomes $\alpha + \sum_k f_{k}(w_{k})$.* 
 
