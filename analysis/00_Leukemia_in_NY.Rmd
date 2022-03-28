@@ -14,6 +14,13 @@ library(DClusterm) # data
 library(tidyverse)
 library(pander)
 library(ggplot2)
+library(gridExtra)
+```
+
+
+```{r}
+library(DClusterm)
+data(NY8)
 ```
 
 
@@ -69,7 +76,7 @@ NY8_sf <- NY8_sf %>% mutate(
 ```{r}
 # Plot SMR 
 ggplot(NY8_sf) + geom_sf(aes(fill = SMR)) + # Look nice!
-  scale_fill_gradient(high="red") 
+  scale_fill_gradient(high = "red") 
 ```
 
 
@@ -81,10 +88,13 @@ syracuse <- which(NY8$AREANAME == "Syracuse city")
 
 # Plot it
 ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = SMR)) + 
-  scale_fill_gradient(high="red") 
+  scale_fill_gradient(high = "red") 
 ```
 
-## Fitting a mixed-effects (Poisson regression) model 
+
+## Poisson Models
+
+### Fitting a Poisson regression model 
 
 ```{r}
 #install.packages("INLA") # run once
@@ -93,30 +103,95 @@ ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = SMR)) +
 library(INLA) # now it works?
 ```
 
-Let's work on some toy examples first before coming to fix the issue. 
+Let's work on some toy examples first before coming to fix the issue. Toy examples work fine. Issues seem to related to `Cases`. Rounding `Cases` work but results differ a bit. 
 
 ```{r}
-# # Fit a Poisson regression model
-# m1 <- inla(Cases ~ 1 + AVGIDIST,
-#            data = NY8_sf,
-#            family = "poisson",
-#            E = NY8_sf$Expected, 
-#            control.predictor = list(compute = TRUE),
-#            control.compute = list(dic = TRUE, waic = TRUE))
+# Fit a Poisson regression model
+m1 <- inla(round(Cases) ~ 1 + AVGIDIST,
+           data = NY8_sf,
+           family = "poisson",
+           E = NY8_sf$Expected,
+           control.predictor = list(compute = TRUE),
+           control.compute = list(dic = TRUE, waic = TRUE))
 ```
 
 ```{r}
-# # Fit a different model (random-effects model)
-# NY8_sf <- NY8_sf %>% mutate(
-#   ID = 1:nrow(NY8))
-# 
-# m2 <- inla(Cases ~ 1 + AVGIDIST + f(ID, model = "iid"),
-#   data = as.data.frame(NY8), family = "poisson", 
-#   E = NY8$Expected,
-#   control.predictor = list(compute = TRUE),
-#   control.compute = list(dic = TRUE, waic = TRUE))
+# summary(m1) %>% pander # very bad!
 ```
 
+```{r}
+summary(m1)
+```
+
+
+### Fitting a Poisson regression model with random effects 
+
+```{r}
+# Fit a Poisson regression model with random effects 
+NY8_sf <- NY8_sf %>% mutate(
+  ID = 1:nrow(NY8)) # Use ID as the random effect
+
+m2 <- inla(round(Cases) ~ 1 + AVGIDIST + f(ID, model = "iid"),
+  data = NY8_sf, 
+  family = "poisson",
+  E = NY8_sf$Expected,
+  control.predictor = list(compute = TRUE),
+  control.compute = list(dic = TRUE, waic = TRUE))
+```
+
+```{r}
+summary(m2)
+```
+
+
+### Plotting
+
+```{r}
+# Add fitted values for both m1 & m2
+NY8_sf <- NY8_sf %>% mutate(
+  FIXED_EFF = m1$summary.fitted[, "mean"],
+  IID_EFF = m2$summary.fitted[, "mean"]
+  ) 
+```
+
+```{r}
+# Plot them but for Syracuse city only
+ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = SMR)) + 
+  scale_fill_gradient(high = "red", limits = c(0, 13)) + 
+  labs(title = "SMR") -> p_m0
+```
+
+```{r}
+ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = FIXED_EFF), show.legend = FALSE) +
+  scale_fill_gradient(high = "red", limits = c(0, 13)) + 
+  labs(title = "FIXED_EFF") -> p_m1
+#p_m1 
+```
+
+```{r}
+ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = IID_EFF), show.legend = FALSE) +
+  scale_fill_gradient(high = "red", limits = c(0, 13)) + 
+  labs(title = "IID_EFF") -> p_m2
+```
+
+We want them plotted by the same scale. 
+
+```{r}
+grid.arrange(p_m0, p_m1, p_m2, nrow =2, ncol = 2)
+```
+
+
+## Spatial Models 
+
+
+
+```{r}
+# m.bym = inla(Cases ~ 1 + AVGIDIST + 
+#                f(ID, model = "bym", graph = NY8.mat),
+#              data = as.data.frame(NY8), E = NY8$Expected, family ="poisson",
+#              control.predictor = list(compute = TRUE),
+#              control.compute = list(dic = TRUE, waic = TRUE))
+```
 
 
 \newpage
