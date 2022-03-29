@@ -45,7 +45,7 @@ class(NY8)
 ```{r}
 # Convert it to a df? 
 # https://www.paulamoraga.com/book-geospatial/sec-spatialdataandCRS.html
-head(NY8@data) %>% pander
+NY8@data %>% head %>% pander
 ```
 
 ```{r}
@@ -200,3 +200,6 @@ grid.arrange(p_m0, p_m1, p_m2, nrow =2, ncol = 2)
 ## Reference 
 
 Gómez-Rubio, V. (2019). R-bloggers. Spatial Data Analysis with INLA. [https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/.](https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/)
+
+
+
