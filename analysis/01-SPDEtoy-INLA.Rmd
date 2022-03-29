@@ -5,4 +5,133 @@ date: "3/28/2022"
 output: pdf_document
 ---
 
-Follow [this site](https://becarioprecario.bitbucket.io/spde-gitbook/ch-INLA.html#sec:INLAexample).
+Explanations are a bit confusing but we will follow the example for the purpose of learning the **R** package `R-INLA`. 
+
+## Load packages 
+
+```{r}
+library(INLA)
+library(tidyverse)
+library(pander)
+library(ggplot2)
+library(gridExtra)
+```
+
+## Load data
+
+```{r}
+class(SPDEtoy)
+```
+
+```{r}
+SPDEtoy %>% head %>% pander
+```
+
+## Convert to a SpatialPointsDataFrame
+
+```{r}
+SPDEtoy.sp <- SPDEtoy
+coordinates(SPDEtoy.sp) <- ~ s1 + s2 # Isn't this from the package sp? Yes.
+```
+
+## Plot it 
+
+`s1` and `s2` are x- and y-coordinate and `y` is the simulated observations at the locations.
+
+```{r}
+bubble(SPDEtoy.sp, "y", key.entries = c(5, 7.5, 10, 12.5, 15), 
+       maxsize = 2, xlab = "s1", ylab = "s2")
+```
+
+## Fit a MLR model 
+
+By default, the prior on the intercept $\alpha$ is a uniform; the prior on the coefficients is a Gaussian with mean $0$ and precision (${variance}^{-1}$) $0.001$, and the prior on the precision $\tau$ is a Gamma with parameters $1$ and $0.000005$. These priors can be adjusted. 
+
+The model is as follows: 
+
+$$
+y_i \sim N(\mu_i, \tau^{-1}), i = 1,...,200
+$$
+$$
+\mu_i = \alpha + \beta_1 s_{1i} + \beta_2 s_{2i} 
+$$
+$$
+\alpha \sim Uniform 
+$$
+$$
+\beta_j \sim N(0, {0.001}^{-1}), j = 1, 2 
+$$
+$$
+\tau \sim Gamma (1, 0.00005).
+$$
+
+
+```{r}
+m0 <- inla(y ~ s1 + s2, data = SPDEtoy)
+summary(m0)
+```
+
+## Plot the marginal density for the MLR model
+
+```{r}
+marginal_fixed <- m0$marginals.fixed
+#m0$marginals.fixed$`(Intercept)`
+```
+
+```{r}
+# Plot the intercept using ggplot2
+# https://www.paulamoraga.com/book-geospatial/sec-inla.html
+#m0$marginals.fixed
+alpha <- m0$marginals.fixed$`(Intercept)`
+ggplot(data.frame(inla.smarginal(alpha)), aes(x, y)) +
+  geom_line() + 
+  labs(x = expression(alpha), y = "density") -> p_alpha
+```
+
+```{r}
+# Plot b1
+#m0$marginals.fixed
+s1 <- m0$marginals.fixed$s1
+ggplot(data.frame(inla.smarginal(s1)), aes(x, y)) +
+  geom_line() + 
+  labs(x = expression(beta[1]), y = "density") -> p_beta_1
+```
+
+```{r}
+# Plot b2
+#m0$marginals.fixed
+s2 <- m0$marginals.fixed$s2
+ggplot(data.frame(inla.smarginal(s2)), aes(x, y)) +
+  geom_line() + 
+  labs(x = expression(beta[2]), y = "density") -> p_beta_2
+```
+
+```{r}
+#marginal_random <- m0$marginals.random # no random effects here
+```
+
+```{r}
+# Plot tau
+#m0$marginals.hyperpar
+tau <- m0$marginals.hyperpar$`Precision for the Gaussian observations`
+ggplot(data.frame(inla.smarginal(tau)), aes(x, y)) +
+  geom_line() + 
+  labs(x = expression(tau), y = "density") -> p_tau
+```
+
+```{r}
+# Combine plots
+grid.arrange(p_alpha, p_beta_1, p_beta_2, p_tau, ncol = 2)
+```
+
+## Fit another model 
+
+
+\newpage
+
+## Reference 
+
+[1.3 A simple example.](https://becarioprecario.bitbucket.io/spde-gitbook/ch-INLA.html#sec:INLAexample) 
+
+
+

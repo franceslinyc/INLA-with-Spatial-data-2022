@@ -5,4 +5,4 @@ date: "3/28/2022"
 output: pdf_document
 ---
 
-Follow [this site](https://becarioprecario.bitbucket.io/spde-gitbook/ch-intro.html#sec:toyexample).
+Follow [this site](https://becarioprecario.bitbucket.io/spde-gitbook/ch-intro.html#sec:toyexample). 
