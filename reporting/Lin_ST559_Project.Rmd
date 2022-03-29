@@ -78,11 +78,13 @@ For computational reasons and to ensure accurate approximations, we assume the f
 LGMs are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear mixed model setup, for example,
 
 $$
-y \sim \prod_i^N p(y_i | x_i, \theta)
+y \sim \prod_i^N p(y_i | x_i, \theta), 
 $$
 
+then the mean $\mu_i$ (for observation $y_i$) can be linked to the linear predictor $\eta_i$ through a link function $g$ 
+
 $$
-g(\mu_i) = \eta_i = \alpha + \sum_j \beta_j z_{ji} + \sum_k f_{k}(w_{ki}) + \varepsilon_i,
+\eta_i = g(\mu_i) = \alpha + \sum_j \beta_j z_{ji} + \sum_k f_{k}(w_{ki}) + \varepsilon_i,
 $$
 where $\alpha$ is the overall intercept, $\beta$ are linear effects of fixed covariates $z$, $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$, and $\varepsilon$ are iid random effects. The model components $f_k$ are what make LGMs flexible. Examples of $f_k$ include spatially or temporally correlated effects, smoothing and stochastic spline, measure errors, and random effects with different types of correlations. 
 
