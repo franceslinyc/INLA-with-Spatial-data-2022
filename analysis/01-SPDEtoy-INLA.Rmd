@@ -65,15 +65,52 @@ $$
 \tau \sim Gamma (1, 0.00005).
 $$
 
+### Produce result summaries
 
 ```{r}
 m0 <- inla(y ~ s1 + s2, data = SPDEtoy)
 summary(m0)
 ```
 
-## Plot the marginal density for the MLR model
+### Return parts of the result summaries only
 
 ```{r}
+# Get estimate of marginal likelihood
+m0$mlik
+```
+
+
+```{r}
+# Get summary statistics of fixed effects
+m0$summary.fixed
+```
+```{r}
+# Get summary statistics of random effects
+m0$summary.random # There is no random effect in this model. 
+```
+
+```{r}
+# Get summary statistics of hyperparameters
+m0$summary.hyperpar
+```
+
+
+### Extract predicted values
+
+```{r}
+# Get fitted values
+m0$summary.fitted.values %>% head(3) %>% pander
+```
+
+```{r}
+# # Get marginals of fitted values
+# m0$marginals.fitted.values %>% head(3) %>% pander # Why is it empty?
+```
+
+### Plot the marginal density for the MLR model
+
+```{r}
+# Get posterior marginals of fixed effects
 marginal_fixed <- m0$marginals.fixed
 #m0$marginals.fixed$`(Intercept)`
 ```
@@ -123,6 +160,8 @@ ggplot(data.frame(inla.smarginal(tau)), aes(x, y)) +
 # Combine plots
 grid.arrange(p_alpha, p_beta_1, p_beta_2, p_tau, ncol = 2)
 ```
+
+
 
 ## Fit another model 
 

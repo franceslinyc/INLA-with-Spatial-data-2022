@@ -19,7 +19,7 @@ INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for
 
 ### 0. Bayesian Inference 
 
-The posterior distribution is proportional to the likelihood function multiples by the prior distribution **(Need citation)** 
+The posterior distribution is proportional to the likelihood function multiples by the prior distribution
 
 $$
 f(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} \propto p(y|\theta) p(\theta), 
@@ -32,22 +32,22 @@ However, the integral is generally intractable in closed-form, thus requiring th
 
 ### 1. Latent Gaussian Models
 
-The latent Gaussian models (LGMs) is a class of three-state Bayesian hierarchical models. It involves the following stages: 
+The latent Gaussian models (LGMs) is a class of three-stage Bayesian hierarchical models. It involves the following stages: 
 
-Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameters $\theta$ 
+Stage 1: Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameters $\theta$ 
 
 $$
 y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ _{likelihood}
 $$
 
-The versatility of the model class can be specified through the unobserved latent field. The latent field is assumed to be a GMRF (Gaussian Markov random field) with a sparse precision matrix $Q$ 
+Stage 2: The versatility of the model class can be specified through the unobserved latent field. The latent field is assumed to be a GMRF (Gaussian Markov random field) with a sparse precision matrix $Q$ 
 
 $$
 x | \theta_2 \sim p(x | \theta_2) = N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
 $$
 where $Q = \Sigma^{-1}$ is the precision matrix, which captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms). 
 
-The hyperparameters of the latent field that is not necessarily Gaussian 
+Stage 3: The hyperparameters of the latent field that are not necessarily Gaussian 
 
 $$
 \theta = {(\theta_1, \theta_2)} \sim p(\theta) \ \ \ \ \ _{hyperpriors}
@@ -75,7 +75,7 @@ For computational reasons and to ensure accurate approximations, we assume the f
 
 ### 2. Additive Models
 
-LGMs are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear mixed model setup, for example,
+LGMs (latent Gaussian models) are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear mixed model setup, for example,
 
 $$
 y \sim \prod_i^N p(y_i | x_i, \theta), 
@@ -88,7 +88,7 @@ $$
 $$
 where $\alpha$ is the overall intercept, $\beta$ are linear effects of fixed covariates $z$, $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$, and $\varepsilon$ are iid random effects. The model components $f_k$ are what make LGMs flexible. Examples of $f_k$ include spatially or temporally correlated effects, smoothing and stochastic spline, measure errors, and random effects with different types of correlations. 
 
-*For GLMs (generalized linear models), the expression becomes $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). For GAMs (generalized additive models), the expression becomes $\alpha + \sum_k f_{k}(w_{k})$.* 
+For GLMs (generalized linear models), the expression becomes $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). For GAMs (generalized additive models), the expression becomes $\alpha + \sum_k f_{k}(w_{k})$. 
 
 The model is a LGM $iff$ the joint distribution of 
 
@@ -101,9 +101,7 @@ is Gaussian. I.e.
 $$
 x = (\eta, \alpha, \beta, f(\cdot)) | \theta \sim N(\mu(\theta), Q^{-1}(\theta)). 
 $$
-This can be achieved by assigning Gaussian priors to all terms (the intercept and the parameter of the fixed effects) in $x$. 
-
-If we further assume conditional independence of $x$, then this latent field $x$ is a Gaussian Markov random field. 
+This can be achieved by assigning Gaussian priors to all terms (the intercept and the parameter of the fixed effects) in $x$. If we further assume conditional independence of $x$, then this latent field $x$ is a Gaussian Markov random field. 
 
 
 ### 3. Gaussian Markov Random Fields
@@ -128,6 +126,10 @@ The `R` package `R-INLA` have found spatial applications in a wide variety of fi
 Some selected examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio-demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
 
 
+## A Spatial Example of Leukemia Cases
+
+
+
 
 
 \newpage
@@ -142,5 +144,6 @@ Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers Univer
 Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. [https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
 
 [Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.](https://www.annualreviews.org/doi/full/10.1146/annurev-statistics-060116-054045?casa_token=sIho3hU0GtwAAAAA:hAwMg1zvZyqaxk00jCdYyQFfzc5pDwOz5hKK1AzVjjnIY6CANQ8YWbaCC0EQk-5UteoMDy-aHnUI)
+
 
 
