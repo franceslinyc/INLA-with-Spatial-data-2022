@@ -9,7 +9,7 @@ output: pdf_document
 
 ```{r}
 # Load packages
-library(spdep)
+library(spdep)     # for spatial weights matrix objects
 library(DClusterm) # data
 library(tidyverse)
 library(pander)
@@ -241,23 +241,36 @@ where $\Sigma$ is defined s.t. it induces higher correlation with adjacent areas
 
 There are a few ways to include spatial dependence in $\Sigma$: 
 
-1. SAR (Simultaneous autoregressive): 
+1. SAR (Simultaneous autoregressive):
+
+$$
+\Sigma^{-1} = ({(I - \rho W)}^T ((I - \rho W)))
+$$
 
 2. CAR (Conditional autoregressive): 
 
-3. ICAR (Intrinsic CAR): , etc.
+$$
+\Sigma^{-1} = (I - \rho W)
+$$
+3. ICAR (Intrinsic CAR): 
 
-### Fit 
+$$
+\Sigma^{-1} = diag(n_i) - W,
+$$
+where $n_i$ is the number of neighbors of area $i$. 
 
-### Fit
+4. Mixture of matrices (Leroux et al.’s model): 
 
-```{r}
-# m.bym = inla(Cases ~ 1 + AVGIDIST + 
-#                f(ID, model = "bym", graph = NY8.mat),
-#              data = as.data.frame(NY8), E = NY8$Expected, family ="poisson",
-#              control.predictor = list(compute = TRUE),
-#              control.compute = list(dic = TRUE, waic = TRUE))
-```
+$$
+\Sigma^{-1} = {((1 - \lambda) I_n + \lambda M)}, \lambda \in (0, 1)
+$$
+where $M$ is precision of intrinsic CAR specification. 
+
+### Fit a SLM (spatial lag model) 
+
+### Fit a ICAR (Intrinsic CAR) model 
+
+### Fit a mixture (Leroux et al.) model
 
 
 \newpage
