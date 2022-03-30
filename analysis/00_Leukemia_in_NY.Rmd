@@ -100,7 +100,7 @@ ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = SMR)) +
 #install.packages("INLA") # run once
 #not available for this R version...
 #install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE) # load a while
-library(INLA) # now it works?
+library(INLA) # Now it works.
 ```
 
 Let's work on some toy examples first before coming to fix the issue. Toy examples work fine. Issues seem to related to `Cases`. Rounding `Cases` work but results differ a bit. 
@@ -157,33 +157,99 @@ NY8_sf <- NY8_sf %>% mutate(
 ```{r}
 # Plot them but for Syracuse city only
 ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = SMR)) + 
-  scale_fill_gradient(high = "red", limits = c(0, 13)) + 
-  labs(title = "SMR") -> p_m0
+  scale_fill_gradient(high = "red", limits = c(0, 13)) -> p_m0
+p_m0
 ```
 
 ```{r}
-ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = FIXED_EFF), show.legend = FALSE) +
-  scale_fill_gradient(high = "red", limits = c(0, 13)) + 
-  labs(title = "FIXED_EFF") -> p_m1
-#p_m1 
+ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = FIXED_EFF)) + #, show.legend = FALSE) +
+  scale_fill_gradient(high = "red", limits = c(0, 13)) -> p_m1
+p_m1 
 ```
 
 ```{r}
-ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = IID_EFF), show.legend = FALSE) +
-  scale_fill_gradient(high = "red", limits = c(0, 13)) + 
-  labs(title = "IID_EFF") -> p_m2
+ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = IID_EFF)) + # , show.legend = FALSE) +
+  scale_fill_gradient(high = "red", limits = c(0, 13)) -> p_m2
+p_m2
 ```
 
-We want them plotted by the same scale. 
+We might want them plotted with the same scale. 
 
 ```{r}
-grid.arrange(p_m0, p_m1, p_m2, nrow =2, ncol = 2)
+#grid.arrange(p_m0, p_m1, p_m2, nrow = 3, ncol = 1)
 ```
 
 
-## Spatial Models 
+## Spatial Models for Lattice Data
+
+### Plot spatial neighbors
+
+An adjacency matrix is often used to describe spatial proximity in lattice data. 
+
+```{r}
+# Compute adjacency matrix
+NY8.nb <- poly2nb(NY8) # neighbors
+NY8.nb
+```
+
+```{r}
+class(NY8.nb)
+```
+
+```{r}
+# Plot spatial neighbors using ggplot2 
+# https://mbjoseph.github.io/posts/2018-12-27-plotting-spatial-neighbors-in-ggplot2/
+NY8_sp <- as(NY8_sf, 'Spatial')  # NY8_sf is a "sf" "data.frame"
+class(NY8_sp) # Now is a "SpatialPolygonsDataFrame"
+```
+
+```{r}
+neighbors <- poly2nb(NY8)
+neighbors_sf <- as(nb2lines(neighbors, coords = coordinates(NY8_sp)), 'sf')
+neighbors_sf <- st_set_crs(neighbors_sf, st_crs(NY8_sf))
+```
+
+```{r}
+ggplot(NY8_sf) + 
+  geom_sf() + # remove aes(fill = SMR)
+  geom_sf(data = neighbors_sf)
+```
+
+```{r}
+#plot(NY8) 
+```
+
+```{r}
+# plot(NY8) 
+# plot(NY8.nb, coordinates(NY8), add = TRUE, pch = ".", col = "gray")
+```
 
 
+## Generalized Linear Models With Spatial Random Effects
+
+The GLMs have the following form: 
+$$
+Y = X \beta + Z u + \varepsilon,
+$$
+where $\beta$ is a vector of fixed effects, $u$ is a vector of random effects, 
+
+The vector of random effects $u$ is modeled as MVN: 
+$$
+u \sim N(0, \sigma^2_u \Sigma), 
+$$
+where $\Sigma$ is defined s.t. it induces higher correlation with adjacent areas.
+
+There are a few ways to include spatial dependence in $\Sigma$: 
+
+1. SAR (Simultaneous autoregressive): 
+
+2. CAR (Conditional autoregressive): 
+
+3. ICAR (Intrinsic CAR): , etc.
+
+### Fit 
+
+### Fit
 
 ```{r}
 # m.bym = inla(Cases ~ 1 + AVGIDIST + 
