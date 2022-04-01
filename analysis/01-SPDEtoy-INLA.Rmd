@@ -162,8 +162,9 @@ grid.arrange(p_alpha, p_beta_1, p_beta_2, p_tau, ncol = 2)
 ```
 
 
-
 ## Fit another model 
+
+
 
 
 \newpage

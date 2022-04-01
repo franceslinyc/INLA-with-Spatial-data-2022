@@ -24,6 +24,8 @@ data(NY8)
 ```
 
 
+
+
 ## The `NY8` data
 
 The `NY8` data set contains the number of leukemia cases in an eight-country region of upstate New York from 1978-1982. 
@@ -54,6 +56,8 @@ NY8@data %>% head %>% pander
 ```
 
 
+
+
 ## Plotting 
 
 ```{r}
@@ -80,6 +84,8 @@ ggplot(NY8_sf) + geom_sf(aes(fill = SMR)) + # Look nice!
 ```
 
 
+
+
 ## Subsetting then plotting
 
 ```{r}
@@ -90,6 +96,8 @@ syracuse <- which(NY8$AREANAME == "Syracuse city")
 ggplot(NY8_sf[syracuse, ]) + geom_sf(aes(fill = SMR)) + 
   scale_fill_gradient(high = "red") 
 ```
+
+
 
 
 ## Poisson Models
@@ -180,21 +188,25 @@ We might want them plotted with the same scale.
 ```
 
 
-## Spatial Models for Lattice Data
+
+
+## Spatial Models for Areal (or Lattice) Data
 
 ### Plot spatial neighbors
 
-An adjacency matrix is often used to describe spatial proximity in lattice data. 
+An adjacency (or neighbour) matrix $W$ is often used to describe spatial proximity in areal (lattice) data. Element $W_{ij}$ is non-zero, if area $i$ and $j$ are neighbors. Element $W_{ij}$ is zero, otherwise. 
 
 ```{r}
 # Compute adjacency matrix
-NY8.nb <- poly2nb(NY8) # neighbors
+NY8.nb <- poly2nb(NY8) # construct the neighbours list / neighbour matrix
 NY8.nb
 ```
 
 ```{r}
 class(NY8.nb)
 ```
+
+### Plot spatial neighbors using ggplot2 
 
 ```{r}
 # Plot spatial neighbors using ggplot2 
@@ -204,7 +216,7 @@ class(NY8_sp) # Now is a "SpatialPolygonsDataFrame"
 ```
 
 ```{r}
-neighbors <- poly2nb(NY8)
+neighbors <- poly2nb(NY8) # construct the neighbours list
 neighbors_sf <- as(nb2lines(neighbors, coords = coordinates(NY8_sp)), 'sf')
 neighbors_sf <- st_set_crs(neighbors_sf, st_crs(NY8_sf))
 ```
@@ -225,13 +237,45 @@ ggplot(NY8_sf) +
 ```
 
 
+```{r}
+# Create sparse adjacency matrix
+# Or use the function nb2INLA to generate spatial neighbours for INLA
+NY8.mat <- as(nb2mat(NY8.nb, style = "B"), "Matrix") # generate a weights matrix for a neighbours list with spatial weights 
+# Use this (NY8.mat) for the graph argument in the function inla
+#NY8.mat
+class(NY8.mat)
+```
+
+Here is [a post](https://stats.stackexchange.com/questions/445403/neighborhood-matrix-in-spatio-temporal-model) that discusses the function `poly2nb` vs. `nd2INLA`. We might also need to check [this tutorial](https://ourcodingclub.github.io/tutorials/spatial-modelling-inla/#point) to do more. 
+
+### Plot the adjacency matrix
+
+Is the adjacency matrix the same as spatial neighbor? 
+
+```{r}
+# Plot the adjacency matrix
+image(NY8.mat)
+```
+
+```{r}
+# summ <- summary(NY8.mat)
+# #summ
+# NY8.mat.df <- data.frame(
+#   Origin = rownames(NY8.mat)[summ$i],
+#   Destination = colnames(NY8.mat)[summ$j],
+#   Weight = NY8.mat$x)
+```
+
+
+
+
 ## Generalized Linear Models With Spatial Random Effects
 
 The GLMs have the following form: 
 $$
 Y = X \beta + Z u + \varepsilon,
 $$
-where $\beta$ is a vector of fixed effects, $u$ is a vector of random effects, 
+where $\beta$ is a vector of fixed effects, $u$ is a vector of random effects,...... 
 
 The vector of random effects $u$ is modeled as MVN: 
 $$
@@ -244,14 +288,16 @@ There are a few ways to include spatial dependence in $\Sigma$:
 1. SAR (Simultaneous autoregressive):
 
 $$
-\Sigma^{-1} = ({(I - \rho W)}^T ((I - \rho W)))
+Q = \Sigma^{-1} = ({(I - \rho W)}^T ((I - \rho W))),
 $$
+where $I$ is the identity matrix, $\rho$ is a spatial autocorrelation parameter, and $W$ is the adjacency matrix. 
 
 2. CAR (Conditional autoregressive): 
 
 $$
-\Sigma^{-1} = (I - \rho W)
+Q = \Sigma^{-1} = (I - \rho W)
 $$
+
 3. ICAR (Intrinsic CAR): 
 
 $$
@@ -270,11 +316,32 @@ where $M$ is precision of intrinsic CAR specification.
 
 ### Fit a ICAR (Intrinsic CAR) model 
 
+### Fit a BYM (Besag-York-Mollié) model 
+
+The BYM (Besag-York-Mollié) model is a convolution model of an ICAR (intrinsic CAR) effect and an iid Gaussian latent effect. 
+
+```{r}
+m.bym = inla(round(Cases) ~ 1 + AVGIDIST + 
+               f(ID, model = "bym", graph = NY8.mat),
+             data = NY8_sf, 
+             E = NY8_sf$Expected, 
+             family ="poisson",
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+```
+
+Results differ a bit. 
+
+```{r}
+summary(m.bym)
+```
+
 ### Fit a mixture (Leroux et al.) model
 
 
-\newpage
 
+
+\newpage
 
 ## Reference 
 
