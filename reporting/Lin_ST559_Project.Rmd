@@ -131,16 +131,16 @@ x_i \bot x_j | x_{-ij} \ \ \ \ if \ \ i,j \in E, i \neq j,
 $$
 where $-ij$ refers to all elements other than $i$ and $j$. This is referred to as the pairwise Markov property. 
 
-The Markov assumption in the GMRFs results in a sparse precision matrix (the inverse of the covariance matrix). Recall that 
+The Markov assumption in the GMRFs results in a sparse precision matrix (with lots of elements $=0$). When a matrix is sparse, the computational cost tends also to be lower, allowing for faster computation. Recall that $x \sim N(0, Q = \Sigma^{-1})$ and 
 
 $$
 x_i \bot x_j \iff \Sigma_{ij} = 0, 
 $$
-where $\Sigma$ is the covariance matrix, but this requires the marginal independence assumption, which can be an unreasonable assumption. On the other hand, it can be shown that 
+where $\Sigma$ is the covariance matrix. For $\Sigma$ to be sparse requires the marginal independence assumption, but this can be an unreasonable assumption. On the other hand, it can be shown that 
 $$
 x_i \bot x_j | x_{-ij} \iff Q_{ij} = 0,
 $$
-where $Q$ is the precision matrix, and conditional independence is a more reasonable assumption and their properties are encoded in the precision matrix (Rue & Held, 2005). 
+where $Q$ is the precision matrix (the inverse of the covariance matrix), and conditional independence is a more reasonable assumption and their properties are encoded in the precision matrix (Rue & Held, 2005). 
 
 ### 4. Additive Models and Gaussian Markov Random Fields
 
