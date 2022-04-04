@@ -8,14 +8,25 @@ header-includes: \usepackage{setspace}\onehalfspacing
 
 ## Background and Introduction     
 
-The steps involving the Bayesian inference may appear easy and straightforward: updating prior believes about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not be determined. 
+The steps involving the Bayesian inference may appear easy and straightforward: updating prior beliefs about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not always be determined. 
 
-The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was then introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has gained popularity in many fields. However, these MCMC methods, based on sampling, not only are computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
+The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has gained popularity in many fields. However, these MCMC methods, based on sampling, not only are computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
 
-INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for a class of LGMs (latent Gaussian models) that does not require sampling. I.e. INLA can be applied to a very wide and flexible class of models ranging from GLMMs (generalized linear mixed models) to spatial and spatio-temporal models, named LGMs. INLA allows for faster and more accurate inference without trading speed for accuracy, and it can be accessed through the **R** package `R-INLA`. 
+INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for Bayesian inference that does not require sampling. INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models) to time-series, spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA`. 
 
 
-## Notation 
+
+
+## Applications 
+
+The `R` package `R-INLA` have found applications in a wide variety of fields. In particular, `R-INLA` have found spatial or spatio-temporal applications in fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc. 
+
+Some selected examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio-demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
+
+
+
+
+## Key Components
 
 ### 0. Bayesian Inference 
 
@@ -26,33 +37,33 @@ f(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} 
 $$
 where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. 
 
-Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained (Rue et al., 2017).
+Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained. 
 
 However, the integral is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
+
 
 ### 1. Latent Gaussian Models
 
 The latent Gaussian models (LGMs) is a class of three-stage Bayesian hierarchical models. It involves the following stages: 
 
-Stage 1: Observations $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameters $\theta$ 
+In the 1st stage, observations (or data) $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameter $\theta_1$ 
 
 $$
 y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ _{likelihood}
 $$
 
-Stage 2: The versatility of the model class can be specified through the unobserved latent field. The latent field is assumed to be a GMRF (Gaussian Markov random field) with a sparse precision matrix $Q$ 
-
+In the second stage, the latent field $x | \theta_2$ is assumed to be a GMRF (Gaussian Markov random field) with a sparse precision matrix $Q$ 
 $$
 x | \theta_2 \sim p(x | \theta_2) = N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
 $$
-where $Q = \Sigma^{-1}$ is the precision matrix, which captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms). 
+where $Q = \Sigma^{-1}$ is the precision matrix and $\theta_2$ is a hyperparameter. The versatility of the model class can be specified through the unobserved latent field. The latent field includes all random terms and captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms) (Bolin, 2015). 
 
-Stage 3: The hyperparameters of the latent field that are not necessarily Gaussian 
+In the last stage, the hyperparameters of the latent field that are not necessarily Gaussian are assumed to follow a prior distribution 
 
 $$
-\theta = {(\theta_1, \theta_2)} \sim p(\theta) \ \ \ \ \ _{hyperpriors}
+\theta = {(\theta_1, \theta_2)} \sim p(\theta) , \ \ \ \ \ _{hyperpriors}
 $$
-control the likelihood for the data and/or the latent Gaussian field and can be used to account for variability and strength of dependence. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect. 
+where $p(\cdot)$ is a known distribution. The hyperparameters control the likelihood for the data and/or the latent Gaussian field and can be used to account for variability and strength of dependence. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect (Bolin, 2015). 
 
 Then, the posterior distribution, structured in a hierarchical way, becomes 
 
@@ -88,7 +99,7 @@ $$
 $$
 where $\alpha$ is the overall intercept, $\beta$ are linear effects of fixed covariates $z$, $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$, and $\varepsilon$ are iid random effects. The model components $f_k$ are what make LGMs flexible. Examples of $f_k$ include spatially or temporally correlated effects, smoothing and stochastic spline, measure errors, and random effects with different types of correlations. 
 
-For GLMs (generalized linear models), the expression becomes $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). For GAMs (generalized additive models), the expression becomes $\alpha + \sum_k f_{k}(w_{k})$. 
+GLMs (generalized linear models) is a special case with the expression  $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). GAMs (generalized additive models) is another special case with the expression $\alpha + \sum_k f_{k}(w_{k})$. 
 
 The model is a LGM $iff$ the joint distribution of 
 
@@ -99,35 +110,61 @@ $$
 is Gaussian. I.e. 
 
 $$
-x = (\eta, \alpha, \beta, f(\cdot)) | \theta \sim N(\mu(\theta), Q^{-1}(\theta)). 
+x | \theta = (\eta, \alpha, \beta, f(\cdot)) | \theta \sim N(\mu(\theta), Q^{-1}(\theta)). 
 $$
 This can be achieved by assigning Gaussian priors to all terms (the intercept and the parameter of the fixed effects) in $x$. If we further assume conditional independence of $x$, then this latent field $x$ is a Gaussian Markov random field. 
 
 
 ### 3. Gaussian Markov Random Fields
 
-GMRFs
+A GMRF (Gaussian Markov Random Field) is a random vector that follows a multivariate normal distribution with additional conditional independence properties: for $i \neq j$, $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$. 
 
-The Markov assumption in the GMRFs results in a sparse precision matrix. 
+More specifically, the graph $G$ is typically used to represent the conditional independence properties of the GMRF and a graph $G$ consists of a set of nodes $V$ and edges $E$ 
+
+$$
+G = (V, E),
+$$ 
+where $V$ is a set of nodes $1,...,n$ and $E$ is a set of edges $\{i,j\},$ where $i \neq j \in V$ (Bolin, 2015). Let $x$ be a GMRF wrt to a graph $G = (V, E)$, then it is equivalent to say that $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$ 
+
+$$
+x_i \bot x_j | x_{-ij} \ \ \ \ if \ \ i,j \in E, i \neq j, 
+$$
+where $-ij$ refers to all elements other than $i$ and $j$. This is referred to as the pairwise Markov property. 
+
+The Markov assumption in the GMRFs results in a sparse precision matrix (the inverse of the covariance matrix). Recall that 
+
+$$
+x_i \bot x_j \iff \Sigma_{ij} = 0, 
+$$
+where $\Sigma$ is the covariance matrix, but this requires the marginal independence assumption, which can be an unreasonable assumption. On the other hand, it can be shown that 
+$$
+x_i \bot x_j | x_{-ij} \iff Q_{ij} = 0,
+$$
+where $Q$ is the precision matrix, and conditional independence is a more reasonable assumption and their properties are encoded in the precision matrix (Rue & Held, 2005). 
 
 ### 4. Additive Models and Gaussian Markov Random Fields
 
 ### 5. Laplace Approximations 
+
+
+
 
 ## INLA 
 
 
 
 
-## Applications 
+## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
 
-The `R` package `R-INLA` have found spatial applications in a wide variety of fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc. 
 
-Some selected examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio-demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
+
+
+## Discussion
+
+
 
 
 ## A Spatial Example of Leukemia Cases
-
 
 
 
@@ -138,12 +175,15 @@ Some selected examples include: environmental risk factors to liver Fluke in cat
 
 [Bakka, H., Rue, H., Fuglstad, G. A., Riebler, A., Bolin, D., Illian, J., Krainski, E., & Lindgren, F. (2018). Spatial modeling with R‐INLA: A review. Wiley Interdisciplinary Reviews: Computational Statistics, 10(6), e1443.](https://arxiv.org/pdf/1802.06350.pdf)
 
-[Bolin, D. (2015). *Lecture 1: Introduction
-Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F1slides.pdf)
+[Bolin, D. (2015). *Lecture 1: Introduction Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F1slides.pdf)
 
-Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. [https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
+[Bolin, D. (2015). *Lecture 2: Definitions and properties Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F2slides.pdf)
+
+[Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
 
 [Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.](https://www.annualreviews.org/doi/full/10.1146/annurev-statistics-060116-054045?casa_token=sIho3hU0GtwAAAAA:hAwMg1zvZyqaxk00jCdYyQFfzc5pDwOz5hKK1AzVjjnIY6CANQ8YWbaCC0EQk-5UteoMDy-aHnUI)
+
+Rue, H., & Held, L. (2005). Gaussian Markov random fields: theory and applications. Chapman and Hall/CRC. 
 
 
 
