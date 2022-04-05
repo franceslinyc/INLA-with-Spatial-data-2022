@@ -9,4 +9,4 @@ Expand the INLA algorithm (a fast alternative to MCMC methods for Bayesian infer
 
 Documentation:
 
-Report can be found [here](https://github.com/franceslinyc/INLA-with-Spatial-data-2022/blob/main/reporting/Lin_ST559_Project.pdf). Presentation slides can be found [here]().
+Report can be found [here](https://github.com/franceslinyc/INLA-with-Spatial-data-2022/blob/main/reporting/Lin_ST559_Project.pdf). Presentation slides can be found [here](https://github.com/franceslinyc/INLA-with-Spatial-data-2022/blob/main/reporting/Lin_ST559_Presentation.pdf). 
