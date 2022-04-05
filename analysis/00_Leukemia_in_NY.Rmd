@@ -5,6 +5,8 @@ date: "3/23/2022"
 output: pdf_document
 ---
 
+This project fits 6 models (fixed effects, random effects (iid), SLM, ICAR, BYM and Leroux et al.), produces summary results and plots results. 
+
 ## Load packages
 
 ```{r}
@@ -345,7 +347,7 @@ summary(m.bym)
 
 ## Reference 
 
-Gómez-Rubio, V. (2019). R-bloggers. Spatial Data Analysis with INLA. [https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/.](https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/)
+[Gómez-Rubio, V. (2019). R-bloggers. Spatial Data Analysis with INLA. https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/.](https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/)
 
 
 

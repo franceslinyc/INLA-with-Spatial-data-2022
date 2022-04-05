@@ -19,9 +19,9 @@ INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for
 
 ## Applications 
 
-The `R` package `R-INLA` have found applications in a wide variety of fields. In particular, `R-INLA` have found spatial or spatio-temporal applications in fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc. 
+INLA have found applications in a wide variety of fields. In particular, INLA have found spatial or spatio-temporal applications in fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc. 
 
-Some selected examples include: environmental risk factors to liver Fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio-demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
+Some selected examples include: environmental risk factors to liver fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio-demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
 
 
 
@@ -46,8 +46,7 @@ However, the integral is generally intractable in closed-form, thus requiring th
 
 The latent Gaussian models (LGMs) is a class of three-stage Bayesian hierarchical models. It involves the following stages: 
 
-In the 1st stage, observations (or data) $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameter $\theta_1$ 
-
+In the first stage, observations (or data) $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameter $\theta_1$ 
 $$
 y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ _{likelihood}
 $$
@@ -59,7 +58,6 @@ $$
 where $Q = \Sigma^{-1}$ is the precision matrix and $\theta_2$ is a hyperparameter. The versatility of the model class can be specified through the unobserved latent field. The latent field includes all random terms and captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms) (Bolin, 2015). 
 
 In the last stage, the hyperparameters of the latent field that are not necessarily Gaussian are assumed to follow a prior distribution 
-
 $$
 \theta = {(\theta_1, \theta_2)} \sim p(\theta) , \ \ \ \ \ _{hyperpriors}
 $$
@@ -75,7 +73,7 @@ $$
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \propto \prod_{i \in I} p(y_i | x_i, \theta) p(x | \theta) p(\theta).
 $$
 
-For computational reasons and to ensure accurate approximations, we assume the following assumptions:  
+For computational reasons and to ensure accurate approximations, the following assumptions hold:  
 
 1. Each observation $y_i$ depends only on one component of the latent field $x_i$, and most components of $x$ will not be observed. 
 
@@ -86,7 +84,7 @@ For computational reasons and to ensure accurate approximations, we assume the f
 
 ### 2. Additive Models
 
-LGMs (latent Gaussian models) are an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear mixed model setup, for example,
+LGMs (latent Gaussian models) is an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear mixed model setup, for example,
 
 $$
 y \sim \prod_i^N p(y_i | x_i, \theta), 
@@ -131,7 +129,7 @@ x_i \bot x_j | x_{-ij} \ \ \ \ if \ \ i,j \in E, i \neq j,
 $$
 where $-ij$ refers to all elements other than $i$ and $j$. This is referred to as the pairwise Markov property. 
 
-The Markov assumption in the GMRFs results in a sparse precision matrix (with lots of elements $=0$). When a matrix is sparse, the computational cost tends also to be lower, allowing for faster computation. Recall that $x \sim N(0, Q = \Sigma^{-1})$ and 
+The Markov assumption in the GMRFs results in a sparse precision matrix. When a matrix is sparse (with lots of elements $=0$), the computational cost tends also to be lower, allowing for faster computation. Recall that $x \sim N(0, Q = \Sigma^{-1})$ and 
 
 $$
 x_i \bot x_j \iff \Sigma_{ij} = 0, 
