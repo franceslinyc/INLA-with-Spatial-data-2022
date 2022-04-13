@@ -6,7 +6,9 @@ output: pdf_document
 header-includes: \usepackage{setspace}\onehalfspacing
 ---
 
-## Background and Introduction     
+## 1. Introduction     
+
+### 1.1 Background and Introduction   
 
 The steps involving the Bayesian inference may appear easy and straightforward: updating prior beliefs about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not always be determined. 
 
@@ -15,9 +17,7 @@ The simulation-based inference through the idea of MCMC (Markov chain Monte Carl
 INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for Bayesian inference that does not require sampling. INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models) to time-series, spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA`. 
 
 
-
-
-## Applications 
+### 1.2 Applications 
 
 INLA have found applications in a wide variety of fields. In particular, INLA have found spatial or spatio-temporal applications in fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc. 
 
@@ -26,9 +26,9 @@ Some selected examples include: environmental risk factors to liver fluke in cat
 
 
 
-## Key Components
+## 2. Key Components
 
-### 0. Bayesian Inference 
+### 2.0. Bayesian Inference 
 
 The posterior distribution is proportional to the likelihood function multiples by the prior distribution
 
@@ -42,7 +42,7 @@ Based on the posterior distribution, relevant statistics for the parameters of i
 However, the integral is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
 
 
-### 1. Latent Gaussian Models
+### 2.1. Latent Gaussian Models
 
 The latent Gaussian models (LGMs) is a class of three-stage Bayesian hierarchical models. It involves the following stages: 
 
@@ -82,7 +82,7 @@ For computational reasons and to ensure accurate approximations, the following a
 3. The number of hyperparameters $\theta$ is small (~ $2$ to $5$ but $< 20$). 
 
 
-### 2. Additive Models
+### 2.2. Additive Models
 
 LGMs (latent Gaussian models) is an umbrella class that generalizes the large number of related additive and/or generalized linear models. Consider the generalized linear mixed model setup, for example,
 
@@ -113,23 +113,35 @@ $$
 This can be achieved by assigning Gaussian priors to all terms (the intercept and the parameter of the fixed effects) in $x$. If we further assume conditional independence of $x$, then this latent field $x$ is a Gaussian Markov random field. 
 
 
-### 3. Gaussian Markov Random Fields
+### 2.3. Gaussian Markov Random Fields
 
 A GMRF (Gaussian Markov Random Field) is a random vector that follows a multivariate normal distribution with additional conditional independence properties: for $i \neq j$, $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$. 
 
-More specifically, the graph $G$ is typically used to represent the conditional independence properties of the GMRF and a graph $G$ consists of a set of nodes $V$ and edges $E$ 
+More specifically, undirected graphs $G$ are typically used to represent the conditional independence properties of the GMRF. An undirected graph $G$ consists of a set of nodes $V$ and edges $E$ 
 
 $$
 G = (V, E),
 $$ 
-where $V$ is a set of nodes $1,...,n$ and $E$ is a set of edges $\{i,j\},$ where $i \neq j \in V$ (Bolin, 2015). Let $x$ be a GMRF wrt to a graph $G = (V, E)$, then it is equivalent to say that $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$ 
+where $V$ is a set of nodes $\{ 1,...,n \}$ and $E$ is a set of edges $\{i,j\},$ where $i \neq j \in V$ (Bolin, 2015). 
+
+Formally, a random vector $x = {(x_1,...,x_n)}^T \in \mathbb{R}$ is called a GMRF with respect to a labelled graph $G = (V, E)$ with mean $\mu$ and positive definite matrix $Q$ $iff$ its density has the form 
+
+$$
+p(x) = {(2\pi)}^{-n/2} {|Q|}^{1/2} exp (-\frac{1}{2} {(x - \mu)}^T Q (x - \mu))
+$$
+and
+$$
+Q_{ij} \neq 0 \iff \{i,j\} \in E \ \ \ \ \forall i \neq j.
+$$
+
+Let $x$ be a GMRF with respect to a graph $G = (V, E)$, then it is equivalent to say that $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$ 
 
 $$
 x_i \bot x_j | x_{-ij} \ \ \ \ if \ \ i,j \in E, i \neq j, 
 $$
-where $-ij$ refers to all elements other than $i$ and $j$. This is referred to as the pairwise Markov property. 
+where $-ij$ refers to all elements other than $i$ and $j$. This is referred to as the pairwise Markov property. Equivalent properties include the local Markov property and global Markov property. 
 
-The Markov assumption in the GMRFs results in a sparse precision matrix. When a matrix is sparse (with lots of elements $=0$), the computational cost tends also to be lower, allowing for faster computation. Recall that $x \sim N(0, Q = \Sigma^{-1})$ and 
+The Markov assumption in the GMRFs results in a sparse precision matrix. When a matrix is sparse (with lots of elements $=0$), the computational cost tends also to be lower, allowing for much faster computation. Recall that $x \sim N(0, Q = \Sigma^{-1})$ and 
 
 $$
 x_i \bot x_j \iff \Sigma_{ij} = 0, 
@@ -140,30 +152,38 @@ x_i \bot x_j | x_{-ij} \iff Q_{ij} = 0,
 $$
 where $Q$ is the precision matrix (the inverse of the covariance matrix), and conditional independence is a more reasonable assumption and their properties are encoded in the precision matrix (Rue & Held, 2005). 
 
-### 4. Additive Models and Gaussian Markov Random Fields
-
-### 5. Laplace Approximations 
+### 2.4. Additive Models and Gaussian Markov Random Fields
 
 
 
 
-## INLA 
+### 2.5. Laplace Approximations 
 
 
 
 
-## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
+## 3. INLA 
+
+### 3.1. INLA
 
 
 
 
-## Discussion
+## 3.2. INLA-SPDE (Stochastic Partial Differential Equations) Approach 
 
 
 
 
-## A Spatial Example of Leukemia Cases
+## 4. Discussion
 
+
+
+
+## 5. Spatial Examples 
+
+### 5.1. A Spatial (Areal) Example of Leukemia Cases
+
+### 5.2. A Spatial (Geostatistical) Example of Heavy Metal Concentrations 
 
 
 
