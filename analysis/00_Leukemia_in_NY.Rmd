@@ -12,25 +12,25 @@ This project fits 6 models (fixed effects, random effects (iid), SLM, ICAR, BYM 
 ```{r}
 # Load packages
 library(spdep)     # for spatial weights matrix objects
-library(DClusterm) # data
+library(DClusterm) # for data
 library(tidyverse)
 library(pander)
 library(ggplot2)
 library(gridExtra)
+library(sjmisc)    # transpose df 
+library(here)
 ```
 
-
 ```{r}
+# Load data
 library(DClusterm)
 data(NY8)
 ```
 
 
-
-
 ## The `NY8` data
 
-The `NY8` data set contains the number of leukemia cases in an eight-country region of upstate New York from 1978-1982. 
+The `NY8` data set contains the number of incident leukemia cases per census tract in an eight-country region of upstate New York from 1978-1982 (Waller & Gotway, 2004; Bivand et al., 2008). The `NY8` data set can be accessed from the **R** package `DClusterm`.  
 
 ```{r}
 # Load data
@@ -117,20 +117,20 @@ Let's work on some toy examples first before coming to fix the issue. Toy exampl
 
 ```{r}
 # Fit a Poisson regression model
-m1 <- inla(round(Cases) ~ 1 + AVGIDIST,
-           data = NY8_sf,
-           family = "poisson",
-           E = NY8_sf$Expected,
-           control.predictor = list(compute = TRUE),
-           control.compute = list(dic = TRUE, waic = TRUE))
+m_fixed <- inla(round(Cases) ~ 1 + AVGIDIST,
+                data = NY8_sf,
+                family = "poisson",
+                E = NY8_sf$Expected,
+                control.predictor = list(compute = TRUE),
+                control.compute = list(dic = TRUE, waic = TRUE))
 ```
 
 ```{r}
-# summary(m1) %>% pander # very bad!
+# summary(m_fixed) %>% pander # very bad!
 ```
 
 ```{r}
-summary(m1)
+summary(m_fixed)
 ```
 
 
@@ -141,16 +141,16 @@ summary(m1)
 NY8_sf <- NY8_sf %>% mutate(
   ID = 1:nrow(NY8)) # Use ID as the random effect
 
-m2 <- inla(round(Cases) ~ 1 + AVGIDIST + f(ID, model = "iid"),
-  data = NY8_sf, 
-  family = "poisson",
-  E = NY8_sf$Expected,
-  control.predictor = list(compute = TRUE),
-  control.compute = list(dic = TRUE, waic = TRUE))
+m_random <- inla(round(Cases) ~ 1 + AVGIDIST + f(ID, model = "iid"),
+                 data = NY8_sf, 
+                 family = "poisson",
+                 E = NY8_sf$Expected,
+                 control.predictor = list(compute = TRUE),
+                 control.compute = list(dic = TRUE, waic = TRUE))
 ```
 
 ```{r}
-summary(m2)
+summary(m_random)
 ```
 
 
@@ -159,8 +159,8 @@ summary(m2)
 ```{r}
 # Add fitted values for both m1 & m2
 NY8_sf <- NY8_sf %>% mutate(
-  FIXED_EFF = m1$summary.fitted[, "mean"],
-  IID_EFF = m2$summary.fitted[, "mean"]
+  FIXED_EFF = m_fixed$summary.fitted[, "mean"],
+  IID_EFF = m_random$summary.fitted[, "mean"]
   ) 
 ```
 
@@ -275,29 +275,29 @@ image(NY8.mat)
 
 The GLMs have the following form: 
 $$
-Y = X \beta + Z u + \varepsilon,
+Y = X \beta + Z \alpha + \varepsilon,
 $$
-where $\beta$ is a vector of fixed effects, $u$ is a vector of random effects,...... 
+where $\beta$ is a vector of fixed effects with design matrix $X$, $\alpha$ is a vector of random effects with design matrix $Z$, and $\varepsilon$ is an error term, where it is assumed that $\varepsilon_i \sim N(0, \sigma^2), i = 1,...,n$. 
 
-The vector of random effects $u$ is modeled as MVN: 
+The vector of random effects $\alpha$ is modeled as MVN (it is assumed that) 
 $$
-u \sim N(0, \sigma^2_u \Sigma), 
+\alpha \sim N(0, \sigma^2_\alpha \Sigma), 
 $$
-where $\Sigma$ is defined s.t. it induces higher correlation with adjacent areas.
+where $\Sigma$ is defined such that it induces higher correlation with adjacent areas. 
 
 There are a few ways to include spatial dependence in $\Sigma$: 
 
-1. SAR (Simultaneous autoregressive):
+1. SAR (Simultaneous autoregressive)
 
 $$
-Q = \Sigma^{-1} = ({(I - \rho W)}^T ((I - \rho W))),
+\Sigma^{-1} = ({(I - \rho W)}^T ((I - \rho W))),
 $$
 where $I$ is the identity matrix, $\rho$ is a spatial autocorrelation parameter, and $W$ is the adjacency matrix. 
 
-2. CAR (Conditional autoregressive): 
+2. CAR (Conditional autoregressive)
 
 $$
-Q = \Sigma^{-1} = (I - \rho W)
+\Sigma^{-1} = (I - \rho W)
 $$
 
 3. ICAR (Intrinsic CAR): 
@@ -307,41 +307,214 @@ $$
 $$
 where $n_i$ is the number of neighbors of area $i$. 
 
-4. Mixture of matrices (Leroux et al.’s model): 
+
+4. Mixture of matrices (Leroux et al.’s model) 
 
 $$
 \Sigma^{-1} = {((1 - \lambda) I_n + \lambda M)}, \lambda \in (0, 1)
 $$
 where $M$ is precision of intrinsic CAR specification. 
 
+Note. $\Sigma^{-1} = Q$ is the precision matrix. 
+
+
 ### Fit a SLM (spatial lag model) 
 
+This one seems a bit complicated. Let's wait till the last or skip it altogether. 
+
+
 ### Fit a ICAR (Intrinsic CAR) model 
+
+```{r}
+# Setup model
+# NY8.mat <- as(nb2mat(NY8.nb, style = "B"), "Matrix") # Already define earlier
+```
+
+```{r}
+# Fit model
+m_icar <- inla(round(Cases) ~ 1 + AVGIDIST + 
+                 f(ID, model = "besag", graph = NY8.mat),
+               data = NY8_sf,
+               family ="poisson", 
+               E = NY8_sf$Expected,
+               control.predictor = list(compute = TRUE),
+               control.compute = list(dic = TRUE, waic = TRUE))
+summary(m_icar)
+```
+
+
+Later, we want to repeat these for all models. Perhaps consider a function? 
+
+```{r}
+# Get components from the results
+# 2.4 Model assessment and model choice
+# https://becarioprecario.bitbucket.io/inla-gitbook/ch-INLA.html#sec:modelassess
+m_icar$mlik
+```
+
+```{r}
+# m_icar$mlik[2,1]
+m_icar$mlik[[2,1]]
+```
+
+```{r}
+m_icar$dic$dic
+```
+
+```{r}
+m_icar$waic$waic
+```
+
 
 ### Fit a BYM (Besag-York-Mollié) model 
 
 The BYM (Besag-York-Mollié) model is a convolution model of an ICAR (intrinsic CAR) effect and an iid Gaussian latent effect. 
 
 ```{r}
-m.bym = inla(round(Cases) ~ 1 + AVGIDIST + 
+# Fit model
+m_bym = inla(round(Cases) ~ 1 + AVGIDIST + 
                f(ID, model = "bym", graph = NY8.mat),
              data = NY8_sf, 
-             E = NY8_sf$Expected, 
              family ="poisson",
+             E = NY8_sf$Expected, 
              control.predictor = list(compute = TRUE),
              control.compute = list(dic = TRUE, waic = TRUE))
+summary(m_bym)
 ```
 
-Results differ a bit. 
-
-```{r}
-summary(m.bym)
-```
 
 ### Fit a mixture (Leroux et al.) model
 
+```{r}
+# Setup model
+ICARmatrix <- Diagonal(nrow(NY8.mat), apply(NY8.mat, 1, sum)) - NY8.mat
+Cmatrix <- Diagonal(nrow(NY8), 1) - ICARmatrix
+```
+
+```{r}
+# Fit model
+m_ler = inla(round(Cases) ~ 1 +  AVGIDIST + 
+               f(ID, model = "generic1", Cmatrix = Cmatrix), 
+             data = NY8_sf,
+             family ="poisson",
+             E = NY8_sf$Expected, 
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+summary(m_ler)
+```
+
+Results for all models differ a bit. 
 
 
+## Get results for all models 
+
+```{r}
+# Get criteria
+get_criteria <- function(model){
+  mlik = model$mlik[[2,1]]
+  dic = model$dic$dic
+  waic = model$waic$waic
+  criteria = c(mlik, dic, waic)
+  return(criteria)
+}
+```
+
+```{r}
+# Test
+x = get_criteria(m_icar)
+x
+```
+
+```{r}
+# # Still need SLM
+# get_criteria(m_fixed)
+# get_criteria(m_random)
+# get_criteria(m_icar)
+# get_criteria(m_bym)
+# get_criteria(m_ler)
+```
+
+```{r}
+# Put into a df and consider saving to the folder results
+criteria_df <- tibble(
+  "fixed" = get_criteria(m_fixed), 
+  "iid" = get_criteria(m_random),
+  "ICAR" = get_criteria(m_icar), 
+  "BYM" = get_criteria(m_bym), 
+  "Leroux" = get_criteria(m_ler)
+)
+criteria_df
+```
+
+We want DIC (deviance information criterion) and WAIC (Watanabe-Akaike information criterion (WAIC) to be low since lower DIC or WAIC value indicates better fit of the model. 
+
+```{r}
+criteria_df <- criteria_df %>% rotate_df() %>% rename(
+  Marg_logLik =  V1,
+  DIC = V2, 
+  WAIC = V3
+) # %>% pander # won't work. %>% pander later. 
+```
+
+```{r}
+# Write to the results folder 
+write_rds(criteria_df, here("results", "criteria_df.rds"))
+```
+
+
+## Plot results for all models 
+
+Can we also create a function for plotting? 
+
+```{r}
+# Create sf for plotting
+NY8_sf <- NY8_sf %>% mutate(
+  FIXED_EFF = m_fixed$summary.fitted[, "mean"], 
+  IID_EFF = m_random$summary.fitted[, "mean"], 
+  ICAR = m_icar$summary.fitted[, "mean"], 
+  BYM = m_bym$summary.fitted[, "mean"], 
+  LER = m_ler$summary.fitted[, "mean"]
+  ) 
+```
+
+```{r}
+# Plot base case
+ggplot(NY8_sf[syracuse, ]) + 
+  geom_sf(aes(fill = SMR)) + 
+  scale_fill_gradient(high = "red", limits = c(0, 2)) # Change limits but why? 
+```
+
+```{r}
+ggplot(NY8_sf[syracuse, ]) + 
+  geom_sf(aes(fill = FIXED_EFF)) + 
+  scale_fill_gradient(high = "red", limits = c(0, 2))
+```
+
+```{r}
+ggplot(NY8_sf[syracuse, ]) + 
+  geom_sf(aes(fill = IID_EFF)) + 
+  scale_fill_gradient(high = "red", limits = c(0, 2))
+```
+
+Something is off. 
+
+```{r}
+ggplot(NY8_sf[syracuse, ]) + 
+  geom_sf(aes(fill = ICAR)) + 
+  scale_fill_gradient(high = "red", limits = c(0, 2))
+```
+
+```{r}
+ggplot(NY8_sf[syracuse, ]) + 
+  geom_sf(aes(fill = BYM)) + 
+  scale_fill_gradient(high = "red", limits = c(0, 2))
+```
+
+```{r}
+ggplot(NY8_sf[syracuse, ]) + 
+  geom_sf(aes(fill = LER)) + 
+  scale_fill_gradient(high = "red", limits = c(0, 2))
+```
 
 \newpage
 
