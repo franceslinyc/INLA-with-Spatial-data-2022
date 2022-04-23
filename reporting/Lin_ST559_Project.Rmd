@@ -181,7 +181,46 @@ where $Q$ is the precision matrix (the inverse of the covariance matrix), and co
 
 ## 5. Spatial Examples 
 
+Two data sets are considered. The `NY8` data set is areal data. 
+
+...... is point-referenced (or geostatistical) data. 
+
+Since the focus of this part of the project is on the use of `R-INLA` package, the details of the models used for each data set are briefly introduced here. 
+
+```{r echo=FALSE, message=FALSE}
+library(here)
+library(tidyverse)
+library(pander)
+```
+
 ### 5.1. A Spatial (Areal) Example of Leukemia Cases
+
+The `NY8` data set contains the number of incident leukemia cases per census tract in an eight-country region of upstate New York from 1978-1982 (Waller & Gotway, 2004; Bivand et al., 2008). The `NY8` data set can be accessed from the **R** package `DClusterm`, and it is a `SpatialPolygonsDataFrame` object. 
+
+For this data set, a total of 5 models (fixed effects, random effects (iid), ICAR, BYM and Leroux et al.) are fitted, and results include criteria for model selection (marginal log-likelihood, DIC and WAIC) and plots of predicted values. 
+
+Since the number of incident leukemia cases is count, Poisson GLMs with fixed effects and random effects are fitted. Since there is spatial dependence in the data, spatial models (GLMs with spatial random effects) such as ICAR (Intrinsic Conditional autoregressive), BYM and Leroux et al. model are also considered. 
+
+Without going into details, recall that the GLMs have the following form
+$$
+Y = X \beta + Z \alpha + \varepsilon,
+$$
+where $\beta$ is a vector of fixed effects with design matrix $X$, $\alpha$ is a vector of random effects with design matrix $Z$, and $\varepsilon$ is an error term, where it is assumed that $\varepsilon_i \sim N(0, \sigma^2), i = 1,...,n$. The vector of random effects $\alpha$ is modeled as MVN (it is assumed that) 
+$$
+\alpha \sim N(0, \sigma^2_\alpha \Sigma), 
+$$
+where the covariance matrix $\Sigma$ is defined such that it induces higher correlation with adjacent areas. 
+
+There are a few ways to include spatial dependence in $\Sigma$, and in spatial areal model especially, it is more common to model the precision matrix $Q$ directly, where $Q = \Sigma^{-1}$. In ICAR (Intrinsic CAR), $\Sigma^{-1} = diag(n_i) - W,$ where $n_i$ is the number of neighbors of area $i$. In Leroux et al.'s model (mixture of matrices), $\Sigma^{-1} = {((1 - \lambda) I_n + \lambda M)}, \lambda \in (0, 1),$ where $M$ is precision of intrinsic CAR specification. The BYM (Besag, York and Mollié) model includes two latent random effects: an ICAR latent effect and a Gaussian iid latent effect. 
+
+Results show that for spatially dependent data, spatial models generally perform better than GLM with fixed or random (iid) effects. On the other hand, it is no surprise that the baseline model (fixed effects model) appears to be the poorest fit of all. 
+
+```{r echo=FALSE, message=FALSE}
+criteria_df <- readRDS(here("results", "criteria_df.rds"))
+criteria_df %>% pander
+```
+
+
 
 ### 5.2. A Spatial (Geostatistical) Example of Heavy Metal Concentrations 
 
@@ -199,7 +238,7 @@ where $Q$ is the precision matrix (the inverse of the covariance matrix), and co
 
 [Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
 
-[Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.](https://www.annualreviews.org/doi/full/10.1146/annurev-statistics-060116-054045?casa_token=sIho3hU0GtwAAAAA:hAwMg1zvZyqaxk00jCdYyQFfzc5pDwOz5hKK1AzVjjnIY6CANQ8YWbaCC0EQk-5UteoMDy-aHnUI)
+**[Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.](https://www.annualreviews.org/doi/full/10.1146/annurev-statistics-060116-054045?casa_token=sIho3hU0GtwAAAAA:hAwMg1zvZyqaxk00jCdYyQFfzc5pDwOz5hKK1AzVjjnIY6CANQ8YWbaCC0EQk-5UteoMDy-aHnUI)**
 
 Rue, H., & Held, L. (2005). Gaussian Markov random fields: theory and applications. Chapman and Hall/CRC. 
 
