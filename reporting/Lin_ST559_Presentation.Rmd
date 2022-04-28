@@ -1,5 +1,6 @@
 ---
-title: "INLA for GMRFs (e.g. GLMMs, Spatial Models) with An Example of Leukemia Cases"
+title: | 
+  | \LARGE INLA for GMRFs (e.g. GLMMs, Spatial Models) \large with Spatial Examples of Leukemia Cases and Heavy Metal Concentrations"
 author: "Frances Lin"
 date: "June 2022"
 output: beamer_presentation
@@ -32,10 +33,11 @@ However, MCMC methods
 
 INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for Bayesian inference. INLA
 
-- can be applied to a very flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models) to time-series, spatial and spatio-temporal models. 
+- can be applied to a very flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models) to time-series, and spatial and spatio-temporal models. 
 
 - allows for faster and more accurate inference without trading speed for accuracy, and 
-- is accessible through the **R** package `R-INLA` (Citation). 
+
+- is accessible through the **R** package `R-INLA`. 
 
 
 ## Applications 
@@ -43,8 +45,6 @@ INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for
 INLA have found spatial or spatio-temporal applications in a wide variety of fields such as environment, ecology, disease mapping, public health, cancer research, energy, economics, risk analysis, etc. 
 
 Selected examples include: 
-
-- environmental risk factors to liver fluke in cattle (Innocent et al., 2017); 
 
 - polio-virus eradication in Pakistan (Mercer et al., 2017); 
 
@@ -81,7 +81,11 @@ Selected examples include:
 
 - Discussion 
 
-- A Spatial Example of Leukemia Cases using the package `R-INLA` 
+- Spatial Examples using the package `R-INLA`
+
+  1. Leukemia Incident Cases (Areal data)
+
+  2. Heavy Metal Concentrations (Geostatistical data)
 
 
 ## 0. Bayesian Inference 
@@ -118,7 +122,7 @@ $$
 where $p(\cdot)$ is a known distribution. 
 
 
-## 1. Latent Gaussian Models - Cont. 
+## 1. Latent Gaussian Models
 
 Then, the posterior distribution, structured in a hierarchical way, becomes 
 $$
@@ -139,6 +143,135 @@ For computational reasons and to ensure accurate approximations, the following a
 
 ## 2. Additive Models
 
+LGMs (latent Gaussian models) is an umbrella class that generalizes the large number of related variants of additive and/or generalized linear models.
+
+Applications of LGMs include, for example, 
+
+- regression models (e.g. GAMs/GLMs/GAMMs/GLMMs/++), 
+
+- dynamic models, and 
+
+- spatial (e.g. Gaussian and BYM models) and spatio-temporal models.
 
 
+Consider the Bayesian structured additive model setup, for example, 
+$$
+y \sim \prod_i^N p(y_i | x_i, \theta), 
+$$
+
+
+## 2. Additive Models
+
+then the mean $\mu_i$ (for observation $y_i$) can be linked to the linear predictor $\eta_i$ through a link function $g$ 
+$$
+\eta_i = g(\mu_i) = \alpha + \sum_j \beta_j z_{ji} + \sum_k f_{k}(w_{ki}) + \varepsilon_i,
+$$
+where 
+
+- $\alpha$ is the overall intercept, 
+
+- $\beta$ are linear effects of fixed covariates $z$, 
+
+- $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$, and 
+
+- $\varepsilon$ are iid random effects. 
+
+GLMs (generalized linear models) is a special case with the expression $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). GAMs (generalized additive models) is another special case with the expression $\alpha + \sum_k f_{k}(w_{k})$. 
+
+
+## 2. Additive Models
+
+The model is a LGM $iff$ the joint distribution of the latent field
+$$
+x = (\eta, \alpha, \beta, f(\cdot))
+$$
+is Gaussian. I.e. 
+$$
+x | \theta = (\eta, \alpha, \beta, f(\cdot)) | \theta \sim N(\mu(\theta), Q^{-1}(\theta)). 
+$$
+
+This can be achieved by assigning Gaussian priors to all terms (the intercept and the parameter of the fixed effects) in $x$.
+
+If we further assume conditional independence of $x$, then this latent field $x$ is a Gaussian Markov random field. 
+
+
+## 3. Gaussian Markov Random Fields
+
+A GMRF (Gaussian Markov Random Field) is a random vector that follows a multivariate normal distribution with additional conditional independence properties: 
+
+- for $i \neq j$, $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$.
+
+Undirected graphs $G$ are typically used to represent the conditional independence properties of the GMRF. An undirected graph $G$ consists of a set of nodes $V$ and edges $E$ 
+$$
+G = (V, E),
+$$ 
+where $V$ is a set of nodes $\{ 1,...,n \}$ and $E$ is a set of edges $\{i,j\},$ where $i \neq j \in V$. 
+
+
+## 3. Gaussian Markov Random Fields
+
+Let $x$ be a GMRF with respect to a graph $G = (V, E)$, then it is equivalent to say that $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$ 
+$$
+x_i \bot x_j | x_{-ij} \ \ \ \ if \ \ i,j \in E, i \neq j, 
+$$
+where $-ij$ refers to all elements other than $i$ and $j$. This is referred to as the pairwise Markov property. 
+
+Equivalent properties include the local Markov property and global Markov property. 
+
+
+## 3. Gaussian Markov Random Fields
+
+The Markov assumption in the GMRFs results in a sparse precision matrix. When a matrix is sparse (with lots of elements $=0$), the computational cost tends also to be lower, allowing for much faster computation. 
+
+Recall that $x \sim N(0, Q = \Sigma^{-1})$ and 
+$$
+x_i \bot x_j \iff \Sigma_{ij} = 0, 
+$$
+where $\Sigma$ is the covariance matrix. For $\Sigma$ to be sparse requires the marginal independence assumption, which can be unreasonable. On the other hand, it can be shown that 
+$$
+x_i \bot x_j | x_{-ij} \iff Q_{ij} = 0,
+$$
+where $Q$ is the precision matrix ($Q = \Sigma^{-1}$), and conditional independence is a more reasonable assumption and their properties are encoded in the precision matrix. 
+
+## 4. Additive Models and Gaussian Markov Random Fields
+
+
+
+
+## 5. Laplace Approximations
+
+
+
+
+## INLA 
+
+
+
+
+## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
+
+
+
+
+## Spatial Areal Example Using The `R-INLA` Package
+
+
+
+
+## Spatial Geostatistical Example Using The `R-INLA` Package
+
+
+
+
+## Thank you!
+
+INLA for GMRFs (e.g. GLMMs, Spatial Models) with Spatial Examples of Leukemia Cases and Heavy Metal Concentrations
+
+Frances Lin 
+
+PhD student, Dept. of Statistics, Oregon State University 
+
+Full report, code, etc. are available at 
+
+GitHub: franceslinyc, [INLA-with-Spatial-data-2022](https://github.com/franceslinyc/INLA-with-Spatial-data-2022) 
 
