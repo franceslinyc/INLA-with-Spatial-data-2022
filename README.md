@@ -5,7 +5,7 @@ Frances Lin
 
 ## Description 
 
-Expand the INLA algorithm (a fast alternative to MCMC methods for Bayesian inference) and include spatial examples of leukemia incident cases (areal data) and heavy metal concentrations (geostatistical data) using the **R** package `R-INLA`. 
+Expand the INLA algorithm (a fast and accurate alternative to MCMC methods for Bayesian inference for LGMs) and include spatial examples of leukemia incident cases (areal data) and heavy metal concentrations (geostatistical data) using the **R** package `R-INLA`. 
 
 ## Documentation
 
