@@ -10,11 +10,11 @@ header-includes: \usepackage{setspace}\onehalfspacing
 
 ### 1.1 Background and Introduction   
 
-The steps involving the Bayesian inference may appear easy and straightforward: updating prior beliefs about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not always be determined. 
+The steps involving the Bayesian inference may appear easy and straightforward: updating prior beliefs about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not always be found. 
 
-The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has gained popularity in many fields. While MCMC are asymptotically exact methods, based on sampling, these methods not only can be computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
+The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC methods are a class of algorithms for generating samples from posteriors by constructing a Markov chain that has the target distribution as the stationary distribution. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has quickly gained popularity in many fields. However, while MCMC are asymptotically exact methods, based on sampling, these methods not only can be computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
 
-INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for Bayesian inference for a specific class of models named LGMs (latent Gaussian models). INLA does not require sampling and is a faster but approximate method. INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models), GAMMs (generalized additive mixed models) to time-series, and spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA` (Rue et al., 2017). 
+INLA (integrated nested Laplace approximation) is a fast and accurate alternative to MCMC for Bayesian inference for a specific class of models named LGMs (latent Gaussian models). INLA does not require sampling and is a faster but approximate method. INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models), GAMMs (generalized additive mixed models) to time-series, and spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA` (Rue et al., 2017). 
 
 
 ### 1.2 Applications 
@@ -62,7 +62,7 @@ In the second stage, the latent field $x | \theta_2$ is assumed to be a GMRF (Ga
 $$
 x | \theta_2 \sim p(x | \theta_2) = N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
 $$
-where $Q = \Sigma^{-1}$ is the precision matrix and $\theta_2$ is a hyperparameter. The versatility of the model class can be specified through the unobserved latent field. The latent field includes all random terms and captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms) (Bolin, 2015). 
+where $Q = \Sigma^{-1}$ is the precision matrix and $\theta_2$ is a hyperparameter. The versatility of the model class can be specified through the unobserved latent field. The latent field includes all random terms and captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms; Bolin, 2015). 
 
 In the last stage, the hyperparameters of the latent field that are not necessarily Gaussian are assumed to follow a prior distribution 
 $$
@@ -153,7 +153,7 @@ Although the exact computational cost depends on the actual sparsity pattern in 
 
 ### 2.4. Additive Models and Gaussian Markov Random Fields
 
-One of the key reasons why the INLA approach is so efficient is that it is able to treat the joint distribution for the latent field $x$ as a GMRF with a precision matrix. The sparsity of the precision matrix also boosts computational efficiency, as compared to operations on dense matrices. 
+One of the primary reasons why INLA approach is so efficient is that it is able to treat the joint distribution for the latent field $x$ as a GMRF with a precision matrix. The sparsity of the precision matrix also boosts computational efficiency, comparing to operations on dense matrices. 
 
 
 ### 2.5. Laplace Approximations 
@@ -235,7 +235,7 @@ p(\theta|y) = \frac{p(x, \theta|y)} {p(x|\theta, y)}.
 $$
 Expanding the numerator (such that $p(x, \theta|y) = p(y|x,\theta) p(x|\theta) p(\theta)$) and replacing the denominator with a Laplace approximation, the above expression becomes 
 $$
-\tilde{p}(\theta|y) = \frac{p(y|x,\theta) p(x|\theta) p(\theta)} {\tilde{p}{(x|\theta, y)}} \bigg|_{x=x^*(\theta)} = \tilde{p}((\theta|y)), 
+p(\theta|y) \approx \frac{p(y|x,\theta) p(x|\theta) p(\theta)} {\tilde{p}{(x|\theta, y)}} \bigg|_{x=x^*(\theta)} = \tilde{p}((\theta|y)), 
 $$
 where $\tilde{p}{(x|\theta, y)}$ is the Gaussian approximation to the full conditional of $x$ and $x^*(\theta)$ is the mode of $x$ for a given $\theta$ (Rue et al., 2009, as cited in Morrison, 2017). 
 
@@ -267,7 +267,7 @@ In addition to posterior marginals, estimates for predictive criteria such as th
 
 ...... 
 
-For certain members of GFs (Gaussian fields) with the Matérn covariance function, the GMRF representation can be constructed explicitly through the use of certain SPDE (stochastic partial differential equation, Lindgren et al., 2011). 
+For certain members of GFs (Gaussian fields) with the Matérn covariance function, the GMRF representation on a triangulated lattice can be constructed explicitly through the use of certain SPDE (stochastic partial differential equation, Lindgren et al., 2011). As a result, GMRFs are no longer restricted to lattice (or areal) data. 
 
 Let $||\cdot||$ denote the Euclidean distance in $\mathbb R^d$, the Matérn covariance function between locations $u$, $v \in \mathbb R^d$ is defined as 
 $$
@@ -276,9 +276,9 @@ $$
 $$
 \propto {(\kappa_{\nu} ||v-u||)}^{\nu} K_{\nu} (\kappa_{\nu} ||v-u||), 
 $$
-where $\nu > 0$ is a shape parameter, $\kappa > 0$ is a scaling parameter, and $\sigma^2 = \frac{\Gamma(\nu)} {\Gamma(\nu+d/2) {(4\pi)}^{d/2} \kappa^{2\nu}}$ is the marginal variance, and $K_{\nu}$ is the modified Bessel function of the second kind (Lindgren et al., 2011). Since the Matérn covariance function, along with other covariance functions such as exponential and Gaussian, is isotropic (such that the covariance function depends only on distance, and not direction, between points), $C(u,v)$ is sometimes written as $C(h)$, where $h$ is the distance. 
+where $\nu > 0$ is a shape parameter, $\kappa > 0$ is a scaling parameter, and $\sigma^2 = \frac{\Gamma(\nu)} {\Gamma(\nu+d/2) {(4\pi)}^{d/2} \kappa^{2\nu}}$ is the marginal variance, and $K_{\nu}$ is the modified Bessel function of the second kind with order $\nu>0$, $\kappa>0$ (Lindgren et al., 2011). Since the Matérn covariance function, along with other covariance functions such as exponential and Gaussian, is isotropic (such that the covariance function depends only on distance, and not direction, between points), $C(u,v)$ is sometimes written as $C(h)$, where $h$ is the distance. 
 
-The Matérn covariance function appears naturally in various scientific fields (Guttorp and Gneiting, 2006). Matérn fields, which have covariance function of the form above, are the stationary solutions to the linear fractional SPDE 
+The Matérn covariance function appears naturally in various scientific fields (Guttorp and Gneiting, 2006). Let $x(u)$ be Matérn fields, which have covariance function of the form above, are the stationary solutions to the linear fractional SPDE 
 $$
 {(\kappa^2 - \Delta)}^{\alpha/2} x(u) = W(u), \ \ u \in \mathbb R^d, \\ \alpha = \nu + d/2, \\ \kappa > 0, \ \ \nu > 0 ,
 $$
@@ -322,7 +322,7 @@ criteria_df <- readRDS(here("results", "criteria_df.rds"))
 criteria_df %>% pander
 ```
 
-Plots of predicted values are omitted here since the data analysis focus is on Section 4.2. 
+Plots of predicted values are omitted here. 
 
 
 ### 4.2. A Spatial Geostatistical Example of Heavy Metal Concentrations 
