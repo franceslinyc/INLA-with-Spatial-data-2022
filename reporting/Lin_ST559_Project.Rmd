@@ -6,15 +6,15 @@ output: pdf_document
 header-includes: \usepackage{setspace}\onehalfspacing
 ---
 
-## 1. Introduction     
+## 1. Introduction 
 
-### 1.1 Background and Introduction   
+### 1.1 Background and Introduction 
 
 The steps involving the Bayesian inference may appear easy and straightforward: updating prior beliefs about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not always be found. 
 
-The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC methods are a class of algorithms for generating samples from posteriors by constructing a Markov chain that has the target distribution as the stationary distribution. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has quickly gained popularity in many fields. However, while MCMC are asymptotically exact methods, based on sampling, these methods not only can be computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
+The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has quickly gained popularity in many fields. However, while MCMC are asymptotically exact methods, based on sampling, they can not only be computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
 
-INLA (integrated nested Laplace approximation) is a fast and accurate alternative to MCMC for Bayesian inference for a specific class of models named LGMs (latent Gaussian models). INLA does not require sampling and is a faster but approximate method. INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models), GAMMs (generalized additive mixed models) to time-series, and spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA` (Rue et al., 2017). 
+INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for Bayesian inference for a specific class of models named LGMs (latent Gaussian models). INLA does not require sampling and is a faster but approximate method. INLA uses a nested version ("nested") of the Laplace approximation, combined with modern numerical techniques for integration ("integrated"). INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models), GAMMs (generalized additive mixed models) to time-series, and spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA` (Rue et al., 2017). 
 
 
 ### 1.2 Applications 
@@ -23,14 +23,14 @@ INLA have found applications in a wide variety of fields. In particular, INLA ha
 
 Some selected examples include: environmental risk factors to liver fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio-demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
 
-
+Section 2 contains key components that make up INLA. Section 3 introduces INLA. Section 4 includes discussion. Two spatial examples using the `R-INLA` package are included in the appendix. 
 
 
 ## 2. Key Components
 
 ### 2.0. Bayesian Inference 
 
-The posterior distribution is proportional to the likelihood function multiples by the prior distribution
+The posterior distribution is proportional to the likelihood function multiples by the prior distribution 
 $$
 p(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} \propto p(y|\theta) p(\theta), 
 $$
@@ -53,29 +53,30 @@ However, the integral is generally intractable in closed-form, thus requiring th
 
 The latent Gaussian models (LGMs) is a class of three-stage Bayesian hierarchical models where $p(x|\theta)$ is a Gaussian distribution. Applications of LGMs include, for example, regression models (e.g. GAMs/GLMs/GAMMs/GLMMs/++), dynamic models, and spatial (e.g. Gaussian and BYM models) and spatio-temporal models (Rue et.al, 2009). A LGM involves the following stages: 
 
-In the first stage, observations (or data) $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameter $\theta_1$ 
+1. In the first stage, observations (or data) $y$ is assumed to be conditionally independent, given a latent Gaussian random field $x$ (joint distribution of all parameters in the linear predictor) and hyperparameter $\theta_1$ 
 $$
-y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ _{likelihood}
+y | x, \theta_1 \sim \prod_{i \in I} p (y_i | x_i, \theta_1). \ \ \ \ \ \ \ _{likelihood}
 $$
 
-In the second stage, the latent field $x | \theta_2$ is assumed to be a GMRF (Gaussian Markov random field) with a sparse precision matrix $Q$ 
+2. In the second stage, the latent field $x | \theta_2$ is assumed to be a GMRF (Gaussian Markov random field) with a sparse precision matrix $Q$ 
 $$
 x | \theta_2 \sim p(x | \theta_2) = N(\mu(\theta_2), Q^{-1}(\theta_2)), \ \ \ \ \ _{latent \ field}
 $$
 where $Q = \Sigma^{-1}$ is the precision matrix and $\theta_2$ is a hyperparameter. The versatility of the model class can be specified through the unobserved latent field. The latent field includes all random terms and captures the underlying dependence structure of the data. Latent field can be, for example, covariates, unstructured random effects (e.g. white noise), structure random effects (e.g. temporal dependency, spatial dependency, smoothness terms; Bolin, 2015). 
 
-In the last stage, the hyperparameters of the latent field that are not necessarily Gaussian are assumed to follow a prior distribution 
+3. In the last stage, the hyperparameters of the latent field that are not necessarily Gaussian are assumed to follow a prior distribution 
 $$
 \theta = {(\theta_1, \theta_2)} \sim p(\theta) , \ \ \ \ \ _{hyperpriors}
 $$
 where $p(\cdot)$ is a known distribution. The hyperparameters control the likelihood for the data and/or the latent Gaussian field and can be used to account for variability and strength of dependence. Hyperparameters can be, for example, variance of observation noise, variance of the unstructured random field, range of a structured random effect (Bolin, 2015). 
 
-Then, the posterior distribution, structured in a hierarchical way, becomes 
+Inference in hierarchical models is based on the posterior distribution, and the posterior distribution, structured in a hierarchical way, becomes 
 $$
-p(x, \theta | y) \propto p(y|x, \theta) p(x, \theta)
+p(x, \theta | y) \propto p(\theta) p(x | \theta) \prod_{i \in I} p(y_i | x_i, \theta) 
 $$
+
 $$
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \propto \prod_{i \in I} p(y_i | x_i, \theta) p(x | \theta) p(\theta).
+\propto p(\theta) {|Q(\theta)|}^{1/2} \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log p(y_i|x_i,\theta)). 
 $$
 
 For computational reasons and to ensure accurate approximations, the following assumptions hold:  
@@ -99,24 +100,18 @@ then the mean $\mu_i$ (for observation $y_i$) can be linked to the linear predic
 $$
 \eta_i = g(\mu_i) = \alpha + \sum_j \beta_j z_{ji} + \sum_k f_{k}(w_{ki}) + \varepsilon_i,
 $$
-where $\alpha$ is the overall intercept, $\beta$ are linear effects of fixed covariates $z$, $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of some covariates $w$, and $\varepsilon$ are iid random effects. The model components $f_k$ are what make LGMs flexible. Examples of $f_k$ include spatially or temporally correlated effects, smoothing and stochastic spline, measure errors, and random effects with different types of correlations. 
+where $\alpha$ is the overall intercept, $\beta$ are linear effects of fixed covariates $z$, $\{f_k\}$, which are used to represent specific Gaussian processes, are nonlinear/smooth effects of covariates $w$, and $\varepsilon$ are iid random effects. The model components $f_k$ are what make LGMs flexible. Examples of $f_k$ include spatially or temporally correlated effects, smoothing and stochastic spline, measure errors, and random effects with different types of correlations. GLMs (generalized linear models) is a special case with the expression $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). GAMs (generalized additive models) is another special case with the expression $\alpha + \sum_k f_{k}(w_{k})$. 
 
-GLMs (generalized linear models) is a special case with the expression $\alpha + \sum_j \beta_j z_{j}$ (i.e. $f(\cdot) = 0$). GAMs (generalized additive models) is another special case with the expression $\alpha + \sum_k f_{k}(w_{k})$. 
-
-The model is a LGM $iff$ the joint distribution of the latent field
+The model formulation in the above model and LGM relate to the same class of models $iff$ the joint distribution of the latent field $x$ is jointly Gaussian. I.e. 
 $$
-x = (\eta, \alpha, \beta, f(\cdot))
-$$
-is Gaussian. I.e. 
-$$
-x | \theta = (\eta, \alpha, \beta, f(\cdot)) | \theta \sim N(\mu(\theta), Q^{-1}(\theta)). 
+x = (\eta, \alpha, \beta, f(\cdot)) \sim N(0, \Sigma = Q^{-1}). 
 $$
 This can be achieved by assigning Gaussian priors to all terms (the intercept and the parameter of the fixed effects) in $x$. If we further assume conditional independence of $x$, then this latent field $x$ is a Gaussian Markov random field. 
 
 
 ### 2.3. Gaussian Markov Random Fields
 
-A GMRF (Gaussian Markov Random Field) is a random vector that follows a multivariate normal distribution with additional conditional independence properties: for $i \neq j$, $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$. 
+GMRFs (Gaussian Markov Random Fields) provide computational benefit since calculations involving a sparse matrix are much less costly. A GMRF is a random vector that follows a multivariate normal distribution with additional conditional independence properties: for $i \neq j$, $x_i$ and $x_j$ are conditionally independent given the remaining elements $x_{-ij}$, for several $\{i,j\}$s. 
 
 Undirected graphs $G$ are typically used to represent the conditional independence properties of the GMRF. An undirected graph $G$ consists of a set of nodes $V$ and edges $E$ 
 $$
@@ -130,7 +125,7 @@ p(x) = {(2\pi)}^{-n/2} {|Q|}^{1/2} \exp (-\frac{1}{2} {(x - \mu)}^T Q (x - \mu))
 $$
 and
 $$
-Q_{ij} \neq 0 \iff \{i,j\} \in E \ \ \ \ \forall i \neq j.
+Q_{ij} \neq 0 \iff \{i,j\} \in E \ \ \forall i \neq j.
 $$
 
 Let $x$ be a GMRF with respect to a graph $G = (V, E)$, then it is equivalent to say that $x_i$ and $x_j$ are conditionally independent, given the remaining elements $x_{-ij}$ 
@@ -143,17 +138,18 @@ The Markov assumption in the GMRFs results in a sparse precision matrix. When a 
 $$
 x_i \bot x_j \iff \Sigma_{ij} = 0, 
 $$
-where $\Sigma$ is the covariance matrix. For $\Sigma$ to be sparse requires the marginal independence assumption, but this can be an unreasonable assumption. On the other hand, it can be shown that 
+where $\Sigma$ is the covariance matrix. For $\Sigma$ to be sparse requires the marginal independence assumption, which can be unreasonable. On the other hand, it can be shown that 
 $$
 x_i \bot x_j | x_{-ij} \iff Q_{ij} = 0,
 $$
-where $Q$ is the precision matrix (the inverse of the covariance matrix), and conditional independence is a more reasonable assumption and their properties are encoded in the precision matrix (Rue & Held, 2005). 
+where $Q$ is the precision matrix (the inverse of the covariance matrix), and the conditional independence is a more reasonable assumption and their properties are encoded in the precision matrix (Rue & Held, 2005). 
 
 Although the exact computational cost depends on the actual sparsity pattern in the precision matrix, for the autoregressive (temporal) example, the $mxm$ sparse precision matrix can be factorized from $\mathcal{O}(m^3)$ to $\mathcal{O}(m)$ with memory requirement reduced from $\mathcal{O}(m^2)$ to $\mathcal{O}(m)$. For models with a spatial structure, the cost is in $\mathcal{O}(m^{3/2})$ paired with a $\mathcal{O}(m\log(m))$ memory requirement, and for models with a spatio-temporal structure, the cost is in $\mathcal{O}(m^{2})$. 
 
+
 ### 2.4. Additive Models and Gaussian Markov Random Fields
 
-One of the primary reasons why INLA approach is so efficient is that it is able to treat the joint distribution for the latent field $x$ as a GMRF with a precision matrix. The sparsity of the precision matrix also boosts computational efficiency, comparing to operations on dense matrices. 
+One of the primary reasons why INLA approach is so efficient is that it is able to treat the joint distribution for the latent field $x$ as a GMRF with a precision matrix that is easy to compute. The sparsity of the precision matrix also boosts computational efficiency, compared with operations on dense matrices. 
 
 
 ### 2.5. Laplace Approximations 
@@ -169,7 +165,14 @@ $$
 $$
 = \exp(nf(x_0)) \sqrt(\frac{2\pi} {-nf^{''}(x_0)}) = \tilde{I}_n.
 $$
-By the central limit theorem, the Gaussian approximation will be exact as $n \to \infty$. 
+By the central limit theorem, the Gaussian approximation will be exact as $n \to \infty$. The extension to higher-dimensional integrals is also immediate with the errors given as 
+$$
+I_n = \tilde{I}_n(1 + \mathcal{O}(n^{-1})). 
+$$
+
+The Laplace approximation was once a key tool for high-dimensional integration pre-MCMC times.
+
+......
 
 Put it simply, Taylor series expansion states that a function about a point $a$ can be expanded into a sum of terms and a finite number of these terms can be used as an approximation (Morrison, 2017). That is, 
 $$
@@ -177,7 +180,10 @@ f(x) = f(a) + \frac{f^{'}(a)} {1!} (x-a) + \frac{f^{''}(a)} {2!} {(x-a)}^2 + \fr
 $$
 Specifying $f(x)$ with $\log g(x)$ and using only the first three terms of the expansion around the mode $\hat{x}$, then 
 $$
-\log g(x) \approx \log g(\hat{x}) + \frac{\partial \log g(\hat{x})} {\partial x} {(x-\hat{x})} + \frac{\partial^2 \log g(\hat{x})} {\partial x^2} \frac{1} {2!} {(x-\hat{x})}^2 = \log g(\hat{x}) + \frac{\partial^2 \log g(\hat{x})} {2 \partial x^2} {(x-\hat{x})}^2  
+\log g(x) \approx \log g(\hat{x}) + \frac{\partial \log g(\hat{x})} {\partial x} {(x-\hat{x})} + \frac{\partial^2 \log g(\hat{x})} {\partial x^2} \frac{1} {2!} {(x-\hat{x})}^2
+$$
+$$
+ = \log g(\hat{x}) + \frac{\partial^2 \log g(\hat{x})} {2 \partial x^2} {(x-\hat{x})}^2  
 $$
 $$
 = \log g(\hat{x}) - \frac{1} {2 \sigma^2} {(x-\hat{x})}^2 ,
@@ -193,7 +199,10 @@ $$
 $$
 where $c = \int \exp (\log g(\hat{x})) dx$ is some constant. Using a Laplace approximation to approximate the distribution $f(x)$ that is approximately normal, mean $\hat{x}$ can be found by solving $f^{'}(x) = 0$ and variance $\hat{\sigma}^2 = -1 / f^{''}(x)$ at the mode $\hat{x}$. 
 
-...... Laplace approximation, which uses a sequence of Gaussian approximations, can do much better. 
+...... 
+
+Laplace approximation, which uses a sequence of Gaussian approximations, can do much better. 
+
 
 ## 3. INLA 
 
@@ -201,24 +210,24 @@ where $c = \int \exp (\log g(\hat{x})) dx$ is some constant. Using a Laplace app
 
 The main goal of Bayesian inference is to approximate the posterior marginals for the hyperparameters and latent field respectively 
 $$
-p(\theta_j|y), j = 1,..., |\theta|, \ \ \ \ \ p(x_i | \theta, y), i = 1,...,n. 
+p(\theta_j|y), j = 1,..., |\theta|, \ \ \ \ \ p(x_i | y), i = 1,...,n. 
 $$
 
-The posterior marginals of interest can be rewritten as 
+The posterior marginals of interest can be written as 
 $$
 p(\theta_j|y) = \int p(\theta|y) d\theta_{-j}, 
 $$
 $$
-p(x_i | \theta, y) = \int p(x_i,\theta|y) d\theta = \int p(x_i|\theta,y) p(\theta|y) d\theta, 
+p(x_i | y) = \int p(x_i,\theta|y) d\theta = \int p(x_i|\theta,y) p(\theta|y) d\theta, 
 $$
 and the key feature of the INLA approach is to use the above form to construct nested approximations 
 $$
 \tilde{p}(\theta_j|y) = \int \tilde{p}(\theta|y) d\theta_{-j}, 
 $$
 $$
-\tilde{p}(x_i | \theta, y) = \int \tilde{p}(x_i|\theta,y) \tilde{p}(\theta|y) d\theta, 
+\tilde{p}(x_i | y) = \int \tilde{p}(x_i|\theta,y) \tilde{p}(\theta|y) d\theta, 
 $$
-where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments (Rue et al., 2009). 
+where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments (Rue et al., 2009). The goal is therefore to approximate $p(\theta|y)$ integrate out $\theta_{-j}$ from $\tilde{p}(\theta_j|y)$ and approximate $p(\theta|y)$ and $p(x_i|\theta,y)$ and use numerical integration to integrate out $\theta$ for $\tilde{p}(x_i | y)$. 
 
 The INLA approach is designed specifically for the structure of LGMs, where (1) the likelihood is conditional independent (i.e., $y_i$ only depends on one $x_i$ and $\theta$), (2) $x|\theta$ is a GMRF, and (3) $|\theta|$ is low-dimensional. For LGMs, the problem can be reformulated as series of subproblems that allows the use of Laplace approximations. 
 
@@ -233,11 +242,32 @@ The conditional probability of $\theta$ given $y$ is given as
 $$
 p(\theta|y) = \frac{p(x, \theta|y)} {p(x|\theta, y)}.
 $$
-Expanding the numerator (such that $p(x, \theta|y) = p(y|x,\theta) p(x|\theta) p(\theta)$) and replacing the denominator with a Laplace approximation, the above expression becomes 
+Expanding the numerator and replacing the denominator with a Laplace approximation, then the above expression becomes 
 $$
-p(\theta|y) \approx \frac{p(y|x,\theta) p(x|\theta) p(\theta)} {\tilde{p}{(x|\theta, y)}} \bigg|_{x=x^*(\theta)} = \tilde{p}((\theta|y)), 
+p(\theta|y) \propto \frac{p(\theta) p(x|\theta)  p(y|x,\theta)} {\tilde{p}{(x|\theta, y)}} \bigg|_{x=x^*(\theta)} = \tilde{p}(\theta|y), 
 $$
-where $\tilde{p}{(x|\theta, y)}$ is the Gaussian approximation to the full conditional of $x$ and $x^*(\theta)$ is the mode of $x$ for a given $\theta$ (Rue et al., 2009, as cited in Morrison, 2017). 
+where $\tilde{p}{(x|\theta, y)}$ is the Gaussian approximation to the full conditional of $x$ and $x^*(\theta)$ is the mode of $x$ for a given $\theta$ (Rue et al., 2009, as cited in Morrison, 2017).
+
+Since $|\theta|$ is of low dimension, marginals for $\theta_j|y$ can be derived directly from the approximation to $\theta|y$. This might be costly since each new $\theta$ would require an evaluation of equation $(*)$ 
+$$
+\tilde{p}{(x|\theta, y)} \approx \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log  (p(y_i|x_i,\theta)))
+$$
+$$
+= (2\pi)^{-n/2} {|P(\theta)|}^{1/2} \exp(- \frac{1}{2} {(x - \mu(\theta))}^T P(\theta) (x - \mu(\theta))), \tag{*}
+$$
+where...... 
+
+To approximate $p(\theta_j|y)$, the following steps are involved (Rue et al., 2009): 
+
+1. locate the mode of $\tilde{p}(\theta|y)$ by optimizing $\log(\tilde{p}(\theta|y))$ with respect to $\theta$ using some quasi-Newton method and let $\theta^*$ be the modal configuration. 
+
+2. at the modal configuration $\theta^*$, compute the negative Hessian matrix $H>0$ using finite differences.
+
+3. explore $\log(\tilde{p}(\theta|y))$ to locate the bulk of the probability mass using the z-parameterization.
+
+4. approximate $p(\theta_j|y)$ by using the points that were already computed during steps 1-3 to construct an interpolant to $\log(\tilde{p}(\theta|y))$ and compute marginals using numerical integration from this $\log(\tilde{p}(\theta|y))$. 
+
+The challenge remains in finding a quick and reliable approach, while keeping the number of evaluation points low. Interested readers are referred to Martins et al.'s (2013, section 3.2) paper for details about the default approach that is used now. 
 
 
 ### 3.1.2. Approximating the Posterior Marginals for the Latent Field
@@ -257,17 +287,31 @@ which results in two challenges:
 
 ......
 
+Three approximations are considered: the Gaussian, the Laplace, and the simplified Laplace approximation (Rue et al., 2009, as cited in Morrison, 2017). 
+
+*3.1.2.1 Using Gaussian approximations*
+
+The simplest option is to use the Gaussian approximation 
+
 ......
 
+*3.1.2.2 Using Laplace approximations*
+
+The natural way to improve the Gaussian approximation is to use the Laplace approximation
+
+......
+
+*3.1.2.3 Using a simplified Laplace approximation*
+
 The third option, which is also the default setting in the `R-INLA` software, uses a simplified Laplace approximation. 
+
+...... 
 
 In addition to posterior marginals, estimates for predictive criteria such as the deviance information criterion (DIC, Spiegelhalter et al., 2002), Watanabe-Akaike information criterion (WAIC, Wantanabe, 2010; Gelman et al., 2014) and marginal likelihood and conditional predictive ordinates (Held et al., 2010) can also be derived. 
 
 ## 3.2. INLA-SPDE (Stochastic Partial Differential Equations) Approach 
 
-...... 
-
-For certain members of GFs (Gaussian fields) with the Matérn covariance function, the GMRF representation on a triangulated lattice can be constructed explicitly through the use of certain SPDE (stochastic partial differential equation, Lindgren et al., 2011). As a result, GMRFs are no longer restricted to lattice (or areal) data. 
+For certain members of GFs (Gaussian fields) with the Matérn covariance function, the GMRF representation on a triangulated lattice can be constructed explicitly through the use of certain SPDE (stochastic partial differential equation, Lindgren et al., 2011). As a result, GMRFs are no longer restricted to lattice (or areal) data. The link between GFs and GMRFs also allows for more realistic spatial statistical modeling. 
 
 Let $||\cdot||$ denote the Euclidean distance in $\mathbb R^d$, the Matérn covariance function between locations $u$, $v \in \mathbb R^d$ is defined as 
 $$
@@ -284,8 +328,45 @@ $$
 $$
 where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Delta = \sum_{i=1}^d \frac{\partial^2} {\partial x_i^2}$ is the Laplacian, $W(u)$ is spatial Gaussian white noise, $\nu$ controls the smoothness, and $\kappa$ controls the range (Lindgren et al., 2011; Bolin, 2015). Any solution to the SPDE are named Matérn fields. 
 
+Interested readers are referred to Lindgren et al.'s (2011) work (*or my dissertation but likely not*) for details about the SPDE approach. 
 
-## 4. Spatial Examples Using The `R-INLA` Package
+## 4. Discussion
+
+
+
+
+\newpage
+
+## Reference
+
+[Bakka, H., Rue, H., Fuglstad, G. A., Riebler, A., Bolin, D., Illian, J., Krainski, E., & Lindgren, F. (2018). Spatial modeling with R‐INLA: A review. Wiley Interdisciplinary Reviews: Computational Statistics, 10(6), e1443.](https://arxiv.org/pdf/1802.06350.pdf)
+
+[Bolin, D. (2015). *Lecture 1: Introduction Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F1slides.pdf)
+
+[Bolin, D. (2015). *Lecture 2: Definitions and properties Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F2slides.pdf)
+
+[Bolin, D. (2015). *Lecture 9: SPDEs and GMRFs (part 2) Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.]()
+
+[Lindgren, F., Rue, H., & Lindström, J. (2011). An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 73(4), 423-498.](https://rss.onlinelibrary.wiley.com/doi/pdfdirect/10.1111/j.1467-9868.2011.00777.x)
+
+[Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
+
+Rue, H., & Held, L. (2005). Gaussian Markov random fields: theory and applications. Chapman and Hall/CRC. 
+
+[Rue, H., Martino, S., & Chopin, N. (2009). Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations. Journal of the royal statistical society: Series b (statistical methodology), 71(2), 319-392.](https://rss.onlinelibrary.wiley.com/doi/pdfdirect/10.1111/j.1467-9868.2008.00700.x)
+
+**[Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.](https://www.annualreviews.org/doi/full/10.1146/annurev-statistics-060116-054045?casa_token=sIho3hU0GtwAAAAA:hAwMg1zvZyqaxk00jCdYyQFfzc5pDwOz5hKK1AzVjjnIY6CANQ8YWbaCC0EQk-5UteoMDy-aHnUI)** 
+
+Rue, H., Martino, S., Lindgren, F., Simpson, D., Riebler, A., Krainski, E. T., & Fuglstad, G. A. (2017). INLA: Bayesian analysis of latent Gaussian models using integrated nested laplace approximations. R package version, 17, 20. 
+
+## Tutorial 
+
+
+\newpage
+
+## Appendix 
+
+## 5. Spatial Examples Using The `R-INLA` Package
 
 Two data sets are considered. The `NY8` data set is areal data. The `meuse` data set is point-referenced (or geostatistical) data. Since the focus of this part of the project is on the use of `R-INLA` package, the details of the areal and geostatistical models used for each data set are only briefly introduced here. 
 
@@ -295,7 +376,7 @@ library(tidyverse)
 library(pander)
 ```
 
-### 4.1. A Spatial Areal Example of Leukemia Incident Cases
+### 5.1. A Spatial Areal Example of Leukemia Incident Cases
 
 The `NY8` data set contains the number of incident leukemia cases per census tract in an eight-country region of upstate New York from 1978-1982 (Waller & Gotway, 2004; Bivand et al., 2008). The `NY8` data set can be accessed from the **R** package `DClusterm`, and it is a `SpatialPolygonsDataFrame` object. 
 
@@ -325,43 +406,6 @@ criteria_df %>% pander
 Plots of predicted values are omitted here. 
 
 
-### 4.2. A Spatial Geostatistical Example of Heavy Metal Concentrations 
-
-
-
-
-## 5. Discussion
-
-
-
-
-\newpage
-
-## Reference
-
-[Bakka, H., Rue, H., Fuglstad, G. A., Riebler, A., Bolin, D., Illian, J., Krainski, E., & Lindgren, F. (2018). Spatial modeling with R‐INLA: A review. Wiley Interdisciplinary Reviews: Computational Statistics, 10(6), e1443.](https://arxiv.org/pdf/1802.06350.pdf)
-
-[Bolin, D. (2015). *Lecture 1: Introduction Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F1slides.pdf)
-
-[Bolin, D. (2015). *Lecture 2: Definitions and properties Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F2slides.pdf)
-
-[Bolin, D. (2015). *Lecture 9: SPDEs and GMRFs (part 2) Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.]()
-
-[Lindgren, F., Rue, H., & Lindström, J. (2011). An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 73(4), 423-498.](https://rss.onlinelibrary.wiley.com/doi/pdfdirect/10.1111/j.1467-9868.2011.00777.x)
-
-[Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
-
-Rue, H., & Held, L. (2005). Gaussian Markov random fields: theory and applications. Chapman and Hall/CRC. 
-
-[Rue, H., Martino, S., & Chopin, N. (2009). Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations. Journal of the royal statistical society: Series b (statistical methodology), 71(2), 319-392.](https://rss.onlinelibrary.wiley.com/doi/pdfdirect/10.1111/j.1467-9868.2008.00700.x)
-
-**[Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.](https://www.annualreviews.org/doi/full/10.1146/annurev-statistics-060116-054045?casa_token=sIho3hU0GtwAAAAA:hAwMg1zvZyqaxk00jCdYyQFfzc5pDwOz5hKK1AzVjjnIY6CANQ8YWbaCC0EQk-5UteoMDy-aHnUI)** 
-
-Rue, H., Martino, S., Lindgren, F., Simpson, D., Riebler, A., Krainski, E. T., & Fuglstad, G. A. (2017). INLA: Bayesian analysis of latent Gaussian models using integrated nested laplace approximations. R package version, 17, 20. 
-
-
-
-
-## Tutorial 
+### 5.2. A Spatial Geostatistical Example of Heavy Metal Concentrations 
 
 
