@@ -1,6 +1,6 @@
 ---
 title: | 
-  | \LARGE INLA for GMRFs (e.g. GLMMs, Spatial Models) \large with Spatial Examples of Leukemia Cases and Heavy Metal Concentrations"
+  | \LARGE INLA for GMRFs (e.g. GLMMs, Spatial Models) \large with Spatial Examples of Leukemia Cases and Heavy Metal Concentrations
 author: "Frances Lin"
 date: "June 2022"
 output: beamer_presentation
@@ -27,7 +27,7 @@ However, this is much harder to do in practice since solutions in closed-form ma
 
 However, MCMC methods 
 
-- not only can be computationally demanding (i.e. requires a large amount of CPU), 
+- can not only be computationally demanding (i.e. requires a large amount of CPU), 
 
 - but also present convergence issues. 
 
@@ -94,7 +94,7 @@ The posterior distribution is proportional to the likelihood function multiples 
 $$
 f(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} \propto p(y|\theta) p(\theta), 
 $$
-where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant.
+where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. 
 
 - Based on the posterior distribution, relevant statistics for the parameters of interest (e.g. marginal distribution, means, variances, and credibility intervals) can be obtained. 
 
@@ -235,33 +235,15 @@ where $Q$ is the precision matrix ($Q = \Sigma^{-1}$), and conditional independe
 
 ## 4. Additive Models and Gaussian Markov Random Fields
 
-
-
-
 ## 5. Laplace Approximations
-
-
-
 
 ## INLA 
 
-
-
-
 ## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
-
-
-
 
 ## Spatial Areal Example Using The `R-INLA` Package
 
-
-
-
 ## Spatial Geostatistical Example Using The `R-INLA` Package
-
-
-
 
 ## Thank you!
 
