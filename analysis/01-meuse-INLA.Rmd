@@ -1,0 +1,553 @@
+---
+title: "01-meuse-INLA"
+author: "Frances Lin"
+date: "3/28/2022"
+output: pdf_document
+---
+
+The objective of this project is to get familiar with and compare kriging (uk) and spde (stochastic partial differential equation) via INLA. 
+
+## Load packages
+
+```{r}
+library(gstat) # data
+library(INLA)
+library(tidyverse)
+library(pander)
+library(sp) # will retire
+library(maptools) # for unionSpatialPolygons
+library(gridExtra)
+library(here)
+```
+
+
+
+
+## Load data
+
+```{r}
+data(meuse)
+```
+
+```{r}
+class(meuse)
+```
+
+```{r}
+meuse %>% head(3) %>% pander
+```
+
+## Kriging
+
+### Create a SpatialPointsDataFrame (the `sp` way) and assign CSR
+
+```{r}
+coordinates(meuse) <- ~x+y
+proj4string(meuse) <- CRS("+init=epsg:28992")
+```
+
+```{r}
+class(meuse)
+```
+
+### Do the same things for grid (prediction grid for meuse data)
+
+```{r}
+data(meuse.grid)
+coordinates(meuse.grid) = ~x+y
+proj4string(meuse.grid) <- CRS("+init=epsg:28992")
+gridded(meuse.grid) = TRUE # Not sure.
+```
+
+### Compute the empirical variogram and fit a spherical variogram 
+
+The variogram and kriging sections for this project are meant to be brief. Instead, the focus will be on expanding the INLA section. 
+
+```{r}
+vgm <- variogram(log(zinc) ~ dist, meuse)
+fit.vgm <- fit.variogram(vgm, vgm("Sph"))
+fit.vgm 
+```
+
+Sill (variance) = mean of psill = 0.14086. Nugget (variance when distance = 0) = min of psill = 0.07643. Range (distance when the curve first to flattens out) = mean of range = 364.3. 
+
+```{r}
+vgm_summary <- summary(fit.vgm) 
+vgm_summary 
+```
+```{r}
+# Write to the results folder 
+write_rds(fit.vgm, here("results", "fit.vgm.rds"))
+write_rds(vgm_summary, here("results", "vgm_summary.rds"))
+```
+
+### Fit the (universal) kriging model
+
+```{r}
+krg <- krige(log(zinc) ~ dist, meuse, meuse.grid, model = fit.vgm)
+krg %>% as.data.frame %>% head %>% pander 
+```
+
+```{r}
+#summary(krg)
+```
+
+
+### Visualize the results of UK model
+
+```{r}
+# Add estimates to meuse.grid
+meuse.grid$zinc.krg <- krg$var1.pred
+meuse.grid$zinc.krg.sd <- sqrt(krg$var1.var)
+```
+
+Results show that higher concentrations of (log) zinc in points closer to the Meuse river. 
+
+```{r}
+# Visualize the results of uk
+library(scales) # for comma
+krg %>% as.data.frame %>%
+  ggplot(aes(x=x, y=y)) + geom_tile(aes(fill=var1.pred)) + coord_equal() +
+  scale_fill_gradient(low = "yellow", high="red") +
+  scale_x_continuous(labels=comma) + 
+  scale_y_continuous(labels=comma) + # customise to add commma 
+  labs(title = "uk (universal kriging) results") -> p_uk
+p_uk
+```
+
+
+## Spatial Models using SPED (Stochastic Partial Differential Equations)
+
+A spatial process with a Matérn covariance can be obtained as the weak solution to a stochastic partial differential equation (SPDE, Lindgren et al., 2011). 
+
+It involves the following steps: 
+
+1. Create a mash
+
+2. Make the latent model 
+
+3. Make an A matrix 
+
+4. Organize the data
+
+5. Estimate or predict 
+
+### Preprocess data for INLA 
+
+A mesh needs to be defined over the study region and it will be used to compute the approximation to the solution (i.e., the spatial process). 
+
+### Define the boundary of the study region
+
+```{r}
+# Define the boundary
+meuse.bdy <- unionSpatialPolygons(
+  as(meuse.grid, "SpatialPolygons"), rep(1, length(meuse.grid))
+)
+```
+
+### 1. Create a mash / define a two-dimensional mesh to define the set of basis functions
+
+```{r}
+pts <- meuse.bdy@polygons[[1]]@Polygons[[1]]@coords
+# Create a mesh
+mesh <- inla.mesh.2d(loc.domain = pts, 
+                     max.edge = c(150, 500),
+                     offset = c(100, 250) )
+```
+
+### Plot it
+
+```{r}
+# So that we can plot observations too! 
+coo <- coordinates(meuse)
+```
+
+```{r}
+par(mar = c(0, 0, 0, 0))
+plot(mesh, asp = 1, main = "")
+lines(pts, col = 3, with = 2)
+points(coo, col = "red") # x & y in meuse 
+```
+
+I am still not quite sure what it is. Let's break them into steps.
+
+```{r}
+mesh$n # # of vertices 
+```
+
+```{r}
+# par(mar = c(0, 0, 0, 0))
+# plot(mesh, asp = 1, main = "") 
+```
+
+### Plot them side-by-side
+
+```{r}
+# par(mfrow=c(2,2)) # This turns out to be really bad. Try ggplot2 instead.
+# # Plot1
+# bubble(meuse, "zinc", main = "zinc concentrations (ppm)")
+# # Plot2
+# plot(mesh, asp = 1, main = "")
+# lines(pts, col = 3, with = 2)
+# points(coo, col = "red") # x & y in meuse 
+```
+
+### Plot it using ggplot2
+
+```{r}
+class(mesh)
+```
+
+I am going to skip this for now but check [this](https://sites.stat.washington.edu/peter/591/Lindgren.pdf) and [this](https://inbo.github.io/tutorials/tutorials/r_inla/spatial.pdf) later. 
+
+```{r}
+meuse %>% as.data.frame %>%
+  ggplot(aes(x, y)) + geom_point(aes(size=zinc), alpha=3/4) + 
+  ggtitle("Zinc Concentration (ppm)") + 
+  coord_equal() -> p
+```
+
+```{r}
+class(pts)
+```
+
+```{r}
+plot(pts)
+```
+
+```{r}
+pts %>% as.data.frame %>%
+  ggplot(aes(x, y)) + geom_path() #geo_line doesn't work.
+```
+
+```{r}
+# Convert to df for plotting
+pts_df <- pts %>% as.data.frame
+meuse_df <- meuse %>% as.data.frame
+```
+
+```{r}
+library(inlabru)
+# Use neither as the default 
+ggplot(NULL, aes(x, y)) + 
+  geom_point(data = meuse_df, aes(size=zinc, alpha=3/4)) + 
+  geom_path(data = pts_df) + 
+  gg(mesh) +
+  ggtitle("with Mesh") +
+  coord_equal() -> p_mesh
+p_mesh
+```
+
+```{r}
+# library(inlabru)
+# meuse %>% as.data.frame %>% # Boundary line left to add. 
+#   ggplot(aes(x, y)) + geom_point(aes(size=zinc), alpha=3/4) + 
+#   gg(mesh) +
+#   ggtitle("with Mesh") +
+#   coord_equal() -> p_mesh
+# p_mesh
+```
+
+```{r}
+# Plot them 
+grid.arrange(p, p_mesh, nrow = 2)
+```
+
+### 2. Make the latent model / create a SPDE (stochastic partial differential equation) model
+
+A spatial process with a Matérn covariance can be obtained as the weak solution to a stochastic partial differential equation (SPDE) (Lindgren et al., 2011). 
+
+```{r}
+# Build a SPDE model 
+meuse.spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = smoothness parameter 
+
+# Generate the index set for the SPDE model 
+s.index <- inla.spde.make.index(name = "spatial.field",
+                                n.spde = meuse.spde$n.spde)
+```
+
+
+### 3. Make an A matrix 
+
+```{r}
+# Construct a projection matrix A to project the GRF from the observations to the triangulation vertices 
+A.meuse <- inla.spde.make.A(mesh = mesh, loc = coordinates(meuse)) # Use meuse for estimation 
+
+# Construct another projection matrix A for prediction
+A.pred <- inla.spde.make.A(mesh = mesh, loc = coordinates(meuse.grid)) # Use meuse.grid for prediction 
+```
+
+
+### 4. Organize the data used for estimation (model fitting) or prediction 
+
+```{r}
+# Organize the data, projection matrices and effects for estimation 
+meuse.stack <- inla.stack(data = list(zinc = meuse$zinc),
+                          A = list(A.meuse, 1),
+                          effects = list(c(s.index, list(Intercept = 1)),
+                                         list(dist = meuse$dist)),
+                          tag = "meuse.data") # Change to meuse.est? 
+
+# Organize the data for prediction 
+meuse.stack.pred <- inla.stack(data = list(zinc = NA),
+                               A = list(A.pred, 1),
+                               effects = list(c(s.index, list (Intercept = 1)),
+                                              list(dist = meuse.grid$dist)),
+                               tag = "meuse.pred")
+```
+
+
+### Join stacks of data into a single object 
+
+```{r}
+join.stack <- inla.stack(meuse.stack, meuse.stack.pred)
+```
+
+
+### Fit the spatial model
+
+Other models that can go into the `model =` argument in `f()` include, for example, `spde` (Matèrn correlation (continuous)), `matern2d` (Matèrn correlation (discrete)), `besag` (Intrinsic CAR), `besagproper` (Proper CAR), and `bym` (Convolution). We will explore this more in the future project. 
+
+```{r}
+# Specify the formula
+form <- log(zinc) ~ -1 + Intercept + dist + f(spatial.field, model = spde) # - 1 removes intercept 
+```
+
+```{r}
+# Fit the model
+m1 <- inla(form, 
+           data = inla.stack.data(join.stack, spde = meuse.spde),
+           family = "gaussian",
+           control.predictor = list(A = inla.stack.A(join.stack), compute = TRUE),
+           control.compute = list(cpo = TRUE, dic = TRUE))
+```
+
+According to [this site](https://www.paulamoraga.com/book-geospatial/sec-inla.html), the main arguments of the `inla()` function are 
+
+- `formula`: 
+
+- `data`: 
+
+- `family`: 
+
+- `control.predictor`: 
+
+- `control.compute`: .
+
+
+### Print summary results 
+
+```{r}
+summary(m1)
+```
+
+### Extract summary of the fixed effects
+
+```{r}
+m1$summary.fixed
+```
+
+
+### Extract summary of the random effects
+
+```{r}
+#m1$summary.random
+```
+
+### Extract summary of the hyperparameters
+
+```{r}
+m1$summary.hyperpar
+```
+
+### Extract results for comparision 
+
+```{r}
+# Compute statistics in terms or range and variance
+spde.est <- inla.spde2.result(inla = m1, 
+                              name = "spatial.field",
+                              spde = meuse.spde, 
+                              do.transf = TRUE)
+```
+
+Values differ a bit. 
+
+```{r}
+# Variance to compare to sill 
+variance <- inla.zmarginal(spde.est$marginals.variance.nominal[[1]])
+variance
+```
+```{r}
+# Range
+range <- inla.zmarginal(spde.est$marginals.range.nominal[[1]])
+range
+```
+
+```{r}
+# Write to the results folder 
+write_rds(variance, here("results", "variance.rds"))
+write_rds(range, here("results", "range.rds"))
+```
+
+The `inlabru` package (Bachl et al., 2019) can simplify the way in which the model is defined and fit. 
+
+### Plot it 
+
+```{r}
+class(krg)
+```
+
+```{r}
+class(m1)
+```
+
+```{r}
+#krg
+```
+
+```{r}
+#m1
+```
+
+This might not work but I am gonna try. 
+
+```{r}
+spde <- m1
+```
+
+```{r}
+#spde %>% as.data.frame # Does not work.
+```
+
+```{r}
+# Load spatial domain to interpolate over
+data("meuse.grid") # What is this???
+```
+
+This section needs to be rewritten to be more organized. 
+
+```{r}
+# For krg 
+meuse.grid$zinc.krg <- krg$var1.pred
+```
+
+```{r}
+# For spde
+# Obtain the indices of thr rows corresponding to the predictions 
+index.pred <- inla.stack.index(join.stack, tag = "meuse.pred")$data
+# Create a variable zinc.spde with the posterior mean 
+meuse.grid$zinc.spde <- spde$summary.fitted.values[index.pred, "mean"]
+```
+
+```{r}
+meuse.grid$zinc.spde.ll <- spde$summary.fitted.values[index.pred, "0.025quant"] # lower limit of 95% credible intervals 
+meuse.grid$zinc.spde.ul <- spde$summary.fitted.values[index.pred, "0.975quant"]
+```
+
+```{r}
+meuse.grid %>% head(3) %>% pander
+```
+
+```{r}
+krg %>% as.data.frame %>%
+  ggplot(aes(x=x, y=y)) + geom_tile(aes(fill=var1.pred)) + coord_equal() +
+  scale_fill_gradient(low = "yellow", high="red") +
+  scale_x_continuous(labels=comma) + 
+  scale_y_continuous(labels=comma) + # customize to add commma 
+  labs(title = "uk (universal kriging) results") -> p_uk
+#p_uk
+```
+
+```{r}
+# Plot for krg
+meuse.grid %>% as.data.frame %>% 
+  ggplot(aes(x=x, y=y)) + geom_tile(aes(fill=zinc.krg)) + coord_equal() +
+  scale_fill_gradient(low = "yellow", high="red") +
+  scale_x_continuous(labels=comma) + 
+  scale_y_continuous(labels=comma) +
+  labs(title = "uk results") -> p_krg
+#p_krg # This should match the plot from above.
+```
+
+```{r}
+# Plot for spde
+meuse.grid %>% as.data.frame %>% 
+  ggplot(aes(x=x, y=y)) + geom_tile(aes(fill=zinc.spde)) + coord_equal() +
+  scale_fill_gradient(low = "yellow", high="red") +
+  scale_x_continuous(labels=comma) + 
+  scale_y_continuous(labels=comma) +
+  labs(title = "spde results") -> p_spde
+#p_spde
+```
+
+### Results of spde with credible intervals 
+
+```{r}
+# For ll 
+meuse.grid %>% as.data.frame %>% 
+  ggplot(aes(x=x, y=y)) + geom_tile(aes(fill=zinc.spde.ll)) + coord_equal() +
+  scale_fill_gradient(low = "yellow", high="red") +
+  scale_x_continuous(labels=comma) + 
+  scale_y_continuous(labels=comma) +
+  labs(title = "spde results ll") -> p_spde_ll
+
+# For ul 
+meuse.grid %>% as.data.frame %>% 
+  ggplot(aes(x=x, y=y)) + geom_tile(aes(fill=zinc.spde.ul)) + coord_equal() +
+  scale_fill_gradient(low = "yellow", high="red") +
+  scale_x_continuous(labels=comma) + 
+  scale_y_continuous(labels=comma) +
+  labs(title = "spde results ul") -> p_spde_ul
+```
+
+```{r}
+grid.arrange(p_spde_ll, p_spde, p_spde_ul, ncol = 2)
+```
+
+
+We will come back to explore more and add additional details. 
+
+
+## Compare results of uk vs spde
+
+### Plot results of uk vs spde
+
+```{r}
+# Plot them side-by-side
+grid.arrange(p_krg, p_spde, ncol = 2)
+```
+
+### Plot difference plot of uk vs spde
+
+Areas where it's colored in either red or blue are where `krg` results & `spde` results differ the most since we set `zinc.diff` = `krg` results - `spde` results. 
+
+```{r}
+p_diff <- meuse.grid %>% as.data.frame %>% 
+  mutate(
+    zinc.diff = zinc.krg - zinc.spde
+  ) %>% 
+  ggplot(aes(x=x, y=y)) + geom_tile(aes(fill=zinc.diff)) + coord_equal() +
+  scale_fill_gradient(low = "blue", high="red") +
+  scale_x_continuous(labels=comma) + 
+  scale_y_continuous(labels=comma) +
+  labs(title = "difference of uk vs spde results") 
+p_diff
+```
+
+```{r}
+# Write to the results folder 
+write_rds(p_krg, here("results", "p_krg.rds"))
+write_rds(p_spde, here("results", "p_spde.rds"))
+write_rds(p_diff, here("results", "p_diff.rds"))
+```
+
+\newpage
+
+## Reference 
+
+[Gómez-Rubio, V. (2020). 7.3 Geostatistics. *Bayesian inference with INLA.* CRC Press.](https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#sec:geostats)
+
+[Moraga, P. (2019). 8 Geostatistical data. *Geospatial health data: Modeling and visualization with R-INLA and shiny.* CRC Press.](https://www.paulamoraga.com/book-geospatial/sec-geostatisticaldatatheory.html#spatial-modeling-of-rainfall-in-paraná-brazil)
+
+
+
