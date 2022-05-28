@@ -274,7 +274,7 @@ $$
 The error rate is relative with rate $\mathcal{O}(n^{-1})$, as supposed to additive with rate $\mathcal{O}(n^{-1/2})$, which is common in simulation-based inference. 
 
 
-## INLA 
+## INLA (Integrated Nested Laplace Approximation)
 
 The INLA approach is designed specifically for the structure of LGMs, where 
 
@@ -288,7 +288,8 @@ For LGMs, the problem can be reformulated as series of subproblems that allows t
 
 The exact joint posterior distribution of $x$ and $\theta$ in Section 2.1. is generally difficult to obtain. 
 
-## INLA 
+
+## INLA (Integrated Nested Laplace Approximation)
 
 The main goal of Bayesian inference is to approximate the posterior marginals for the hyperparameters and latent field respectively 
 $$
@@ -305,7 +306,7 @@ $$
 where $\theta_{-j} = (\theta_1,..., \theta_{j-1}, \theta_{j+1},...)$.
 
 
-## INLA
+## INLA (Integrated Nested Laplace Approximation)
 
 The key feature of the INLA approach is to use the above form to construct nested approximations 
 $$
@@ -320,6 +321,7 @@ where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arg
 
 - Approximations to $p(x_i | y)$ are computed by approximating  $p(x_i|\theta,y)$ and $p(\theta|y)$ and using numerical integration to integrate out $\theta$ (Rue et al., 2009). 
 
+
 ## Approximating the Posterior Marginals for the Hyperparameters 
 
 Expanding the numerator and replacing the denominator with a Laplace approximation, then the expression becomes 
@@ -333,7 +335,7 @@ where
 - $x^*(\theta)$ is the mode of $x$ for a given $\theta$.
 
 
-## Posterior Marginals for the Hyperparameters 
+## Approximating the Posterior Marginals for the Hyperparameters 
 
 The denominator is approximated using a Gaussian approximation 
 $$
@@ -351,7 +353,7 @@ where
 - $c(\theta)$ is the vector that contains the negative second derivative e of the log-likelihood at the mode. 
 
 
-## Posterior Marginals for the Hyperparameters 
+## Approximating the Posterior Marginals for the Hyperparameters 
 
 To approximate $p(\theta_j|y)$, the following steps are involved (Rue et al., 2009):
 
@@ -380,7 +382,7 @@ which results in two challenges:
 2. Approximating $p(x_i|\theta,y)$ for a subset of all $i=1,...,n$ using the Laplace approximation can be too demanding since $n$ can be very large ($10^3$ to $10^5$). 
 
 
-## Posterior Marginals for the Latent Field
+## Approximating the Posterior Marginals for the Latent Field
 
 For the first challenge, classical numerical integration is restricted to lower dimensions because higher-dimensional integrals can not only be difficult but also impossible. 
 
@@ -390,8 +392,7 @@ To avoid the integration step,
 
 - In dimensions $>2$, ideas were borrowed from central composite design (Box & Wilson, 1951), which uses integration points on a sphere around the center. 
 
- 
-## Posterior Marginals for the Latent Field 
+## Approximating the Posterior Marginals for the Latent Field
 
 For the second challenge, three approximation options are available in the `R-INLA` package: 
 
@@ -402,7 +403,7 @@ For the second challenge, three approximation options are available in the `R-IN
 - the simplified Laplace approximation (Rue et al., 2009, as cited in Morrison, 2017). 
 
 
-## Posterior Marginals for the Latent Field 
+## Approximating the Posterior Marginals for the Latent Field
 
 The default approach is to compute a Taylor's expansion up to the third order around the mode of the Laplace approximation, which provides an approximation to the standardized Gaussian approximation and appears to be highly accurate 
 $$
@@ -448,7 +449,7 @@ where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Del
 
 (1) The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. Due to time constraint, some of the theoretical as well as computational details are mentioned briefly in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs requires its own exploration and examination. 
 
-(2) The generality of the package `R-INLA` increases complexity for the user. For this project, the data preprocessing stage for the `meuse` (geostatistical) data is more involved, compared to that for the `NY8` (areal) data. 
+(2) The generality of the package `R-INLA` increases complexity for the user. For this project, the data preprocessing stage for the `meuse` (geostatistical) data is more involved, compared to that for the `NY8` (areal) data. For a restricted set of models, efforts have been done to create packages with a simplified interface. 
 
 ## Discussion 
 

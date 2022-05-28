@@ -338,3 +338,5 @@ Rue, H., Martino, S., Lindgren, F., Simpson, D., Riebler, A., Krainski, E. T., &
 
 [Moraga, P. (2019). 8 Geostatistical data. *Geospatial health data: Modeling and visualization with R-INLA and shiny.* CRC Press.](https://www.paulamoraga.com/book-geospatial/sec-geostatisticaldatatheory.html#spatial-modeling-of-rainfall-in-paraná-brazil)
 
+
+
