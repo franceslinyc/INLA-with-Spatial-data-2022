@@ -166,7 +166,7 @@ $$
 $$
 = \exp(nf(x_0)) \sqrt(\frac{2\pi} {-nf^{''}(x_0)}) = \tilde{I}_n.
 $$
-By the central limit theorem, the Gaussian approximation will be exact as $n \to \infty$. The extension to higher-dimensional integrals is also immediate with the errors given as 
+The second term of the Taylor's expansion is equal to $0$ since it is assumed that $f(x)$ is a well-behaved uni-modal function and $f(x)$ achieves its maximum at $x_0$ (Peng, 2018). By the central limit theorem, the Gaussian approximation will be exact as $n \to \infty$. The extension to higher-dimensional integrals is also immediate with the errors given as 
 $$
 I_n = \tilde{I}_n(1 + \mathcal{O}(n^{-1})). 
 $$
@@ -219,7 +219,7 @@ $$
 p{(x|\theta, y)} \propto \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log  (p(y_i|x_i,\theta))) 
 $$
 $$
-= (2\pi)^{-n/2} {|P(\theta)|}^{1/2} \exp(- \frac{1}{2} {(x - \mu(\theta))}^T P(\theta) (x - \mu(\theta))) = \tilde{p}{(x|\theta, y)} , \tag{*}
+= (2\pi)^{-n/2} {|P(\theta)|}^{1/2} \exp(- \frac{1}{2} {(x - \mu(\theta))}^T P(\theta) (x - \mu(\theta))) = \tilde{p}{(x|\theta, y)}, 
 $$
 where $P(\theta) = Q(\theta) + diag(c(\theta))$, $\mu(\theta)$ is the location of the mode, and $c(\theta)$ is the vector that contains the negative second derivative e of the log-likelihood at the mode. 
 
@@ -311,7 +311,9 @@ Just like common GP models have previously been shown to linked to GMRFs (Lindgr
 
 [Lindgren, F., Rue, H., & Lindström, J. (2011). An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 73(4), 423-498.](https://rss.onlinelibrary.wiley.com/doi/pdfdirect/10.1111/j.1467-9868.2011.00777.x)
 
-[Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/)
+[Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.](https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/) 
+
+Peng, R. D. (2018). *5.1 Laplace Approximation*. Advanced statistical computing. Work in progress.
 
 Rue, H., & Held, L. (2005). Gaussian Markov random fields: theory and applications. Chapman and Hall/CRC. 
 
