@@ -153,7 +153,9 @@ One of the primary reasons why INLA approach is so efficient is that it is able 
 
 ### 2.5. Laplace Approximations 
 
-The Laplace approximation is an old technique for the approximation of integrals (Barndorff-Nielsen & Cox, 1989). Let $nf(x)$ be the sum of log-likelihoods and $x$ the unknown parameter, the goal is to approximate the integral 
+The Laplace approximation is an old technique for the approximation of integrals (Barndorff-Nielsen & Cox, 1989). The idea is to approximate the Gaussian target by matching the mode and curvature at the mode, and the mode is computed iteratively using a Newton-Raphson method (also known as the scoring algorithm or its variant, the Fisher scoring algorithm, Rue & Martino, 2009). 
+
+Let $nf(x)$ be the sum of log-likelihoods and $x$ the unknown parameter, the goal is to approximate the integral 
 $$
 I_n = \int_x \exp(n(f(x))) dx 
 $$
@@ -169,42 +171,7 @@ $$
 I_n = \tilde{I}_n(1 + \mathcal{O}(n^{-1})). 
 $$
 
-The Laplace approximation was once a key tool for high-dimensional integration pre-MCMC times.
-
-......
-
-
-Consider using this site (https://bookdown.org/rdpeng/advstatcomp/laplace-approximation.html) to rewrite the following section.
-
-
-Put it simply, Taylor series expansion states that a function about a point $a$ can be expanded into a sum of terms and a finite number of these terms can be used as an approximation (Morrison, 2017). That is, 
-$$
-f(x) = f(a) + \frac{f^{'}(a)} {1!} (x-a) + \frac{f^{''}(a)} {2!} {(x-a)}^2 + \frac{f^{'''}(a)} {3!} {(x-a)}^3 + \cdots .
-$$
-Specifying $f(x)$ with $\log g(x)$ and using only the first three terms of the expansion around the mode $\hat{x}$, then 
-$$
-\log g(x) \approx \log g(\hat{x}) + \frac{\partial \log g(\hat{x})} {\partial x} {(x-\hat{x})} + \frac{\partial^2 \log g(\hat{x})} {\partial x^2} \frac{1} {2!} {(x-\hat{x})}^2
-$$
-$$
- = \log g(\hat{x}) + \frac{\partial^2 \log g(\hat{x})} {2 \partial x^2} {(x-\hat{x})}^2  
-$$
-$$
-= \log g(\hat{x}) - \frac{1} {2 \sigma^2} {(x-\hat{x})}^2 ,
-$$
-since the first derivative at the mode $\hat{x}$ is zero and $\hat{\sigma}^2 = - 1 / \frac{\partial^2 \log g(\hat{x})} {2 \partial x^2}$. 
-
-Exponentiating and integrating both sides, then the above expression becomes
-$$
-\int \exp (\log g(x) dx) =  \int g(x) dx \approx \int \exp (\log g(\hat{x}) - \frac{1} {2 \sigma^2} {(x-\hat{x})}^2 ) dx
-$$
-$$
-= c \int \exp(- \frac{{(x-\hat{x})}^2} {2 \sigma^2}) dx,
-$$
-where $c = \int \exp (\log g(\hat{x})) dx$ is some constant. Using a Laplace approximation to approximate the distribution $f(x)$ that is approximately normal, mean $\hat{x}$ can be found by solving $f^{'}(x) = 0$ and variance $\hat{\sigma}^2 = -1 / f^{''}(x)$ at the mode $\hat{x}$. 
-
-...... 
-
-Laplace approximation, which uses a sequence of Gaussian approximations, can do much better. 
+This provides two advantages. The error rate is relative with rate $\mathcal{O}(n^{-1})$, as supposed to additive with rate $\mathcal{O}(n^{-1/2})$, which is common in simulation-based inference. It was also once a key tool for high-dimensional integration pre-MCMC times. 
 
 
 ## 3. INLA 
@@ -290,12 +257,12 @@ For the first challenge, classical numerical integration is restricted to lower 
 
 For the second challenge, three approximation options are available in the `R-INLA` package: the Gaussian, the Laplace, and the simplified Laplace approximation (Rue et al., 2009, as cited in Morrison, 2017). 
 
-The default approach is to compute a Taylor's expansion up to the third order around the mode of the Laplace approximation, which provides an approximation to the standardized Gaussian approximation 
+The default approach is to compute a Taylor's expansion up to the third order around the mode of the Laplace approximation, which provides an approximation to the standardized Gaussian approximation and appears to be highly accurate 
 $$
-\log p(x_i|\theta, y) \approx b_i(\theta)x_i -\frac{1}{2} + \frac{1}{6}c_i(\theta){x_i}^3
+\log p(x_i|\theta, y) \approx b_i(\theta)x_i -\frac{1}{2}{x_i}^2 + \frac{1}{6}c_i(\theta){x_i}^3
 $$
 
-The Gaussian option is fast but the assumption is strong so results tend to be poor and the Laplace option works well but is computationally more expensive. (Rue et al., 2009, as cited in Morrison, 2017). 
+The Gaussian option is fast but the assumption is strong so results tend to be poor and the Laplace option works well but is computationally more expensive (Rue et al., 2009, as cited in Morrison, 2017). 
 
 ### 3.1.3. Predictive Criteria 
 
