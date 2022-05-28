@@ -287,6 +287,7 @@ $$
 $$
 where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Delta = \sum_{i=1}^d \frac{\partial^2} {\partial x_i^2}$ is the Laplacian, $W(u)$ is spatial Gaussian white noise, $\nu$ controls the smoothness, and $\kappa$ controls the range (Lindgren et al., 2011; Bolin, 2015). Any solution to the SPDE are named Matérn fields. Interested readers are referred to Lindgren et al.'s (2011) work (*or my dissertation but can't promise yet!*) for details about the SPDE approach. 
 
+
 ## 3.3. Deep Generative Models  
 
 Just like common GP models have previously been shown to linked to GMRFs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). 
@@ -294,7 +295,11 @@ Just like common GP models have previously been shown to linked to GMRFs (Lindgr
 
 ## 4. Discussion
 
+The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. However, due to time constraint, some of the theoretical as well as computational details are mentioned briefly in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs can be referenced to a list of books and articles and each requires its own exploration and examination. 
 
+The generality of the package `R-INLA` increases complexity for the user. For this project, the data preprocessing stage for the `meuse` (geostatistical) data is more involved, compared to that for the `NY8` (areal) data. For a restricted set of models, efforts have been done to create packages with a simplified interface. 
+
+Just like common GP models have previously been shown to linked to GMRFs through SPDEs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). Even though of particular interest of mine is the SPDE approach, it is exciting to see that new development such as deep GMRFs has been made. 
 
 
 \newpage
@@ -307,7 +312,7 @@ Just like common GP models have previously been shown to linked to GMRFs (Lindgr
 
 [Bolin, D. (2015). *Lecture 2: Definitions and properties Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F2slides.pdf)
 
-[Bolin, D. (2015). *Lecture 9: SPDEs and GMRFs (part 2) Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.]()
+[Bolin, D. (2015). *Lecture 9: SPDEs and GMRFs (part 2) Gaussian Markov random fields.* Personal Collection of D. Bolin, Chalmers University of Technology, Gothenburg Sweden.](http://www.math.chalmers.se/~bodavid/GMRF2015/Lectures/F9slides.pdf)
 
 [Lindgren, F., Rue, H., & Lindström, J. (2011). An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 73(4), 423-498.](https://rss.onlinelibrary.wiley.com/doi/pdfdirect/10.1111/j.1467-9868.2011.00777.x)
 
@@ -332,6 +337,4 @@ Rue, H., Martino, S., Lindgren, F., Simpson, D., Riebler, A., Krainski, E. T., &
 [Gómez-Rubio, V. (2020). 7.3 Geostatistics. *Bayesian inference with INLA.* CRC Press.](https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#sec:geostats)
 
 [Moraga, P. (2019). 8 Geostatistical data. *Geospatial health data: Modeling and visualization with R-INLA and shiny.* CRC Press.](https://www.paulamoraga.com/book-geospatial/sec-geostatisticaldatatheory.html#spatial-modeling-of-rainfall-in-paraná-brazil)
-
-
 

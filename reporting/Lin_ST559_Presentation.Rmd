@@ -444,15 +444,16 @@ $$
 $$
 where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Delta = \sum_{i=1}^d \frac{\partial^2} {\partial x_i^2}$ is the Laplacian, $W(u)$ is spatial Gaussian white noise, $\nu$ controls the smoothness, and $\kappa$ controls the range (Lindgren et al., 2011; Bolin, 2015). Any solution to the SPDE are named Matérn fields.
 
-## Discussion
+## Discussion 
 
-(1)
+(1) The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. Due to time constraint, some of the theoretical as well as computational details are mentioned briefly in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs requires its own exploration and examination. 
 
-(2)
+(2) The generality of the package `R-INLA` increases complexity for the user. For this project, the data preprocessing stage for the `meuse` (geostatistical) data is more involved, compared to that for the `NY8` (areal) data. 
 
-(3)
+## Discussion 
 
-(4) Just like common GP models have previously been shown to linked to GMRFs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). 
+(3) Just like common GP models have previously been shown to linked to GMRFs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). 
+
 
 ## Spatial Areal Example Using The `R-INLA` Package
 
