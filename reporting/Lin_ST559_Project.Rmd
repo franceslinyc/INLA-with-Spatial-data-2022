@@ -223,7 +223,7 @@ $$
 $$
 where $P(\theta) = Q(\theta) + diag(c(\theta))$, $\mu(\theta)$ is the location of the mode, and $c(\theta)$ is the vector that contains the negative second derivative e of the log-likelihood at the mode. 
 
-To approximate $p(\theta_j|y)$, the following steps are involved (Rue et al., 2009): 
+To approximate $p(\theta_j|y)$, the following steps are involved (Rue et al., 2009):
 
 1. locate the mode of $\tilde{p}(\theta|y)$ by optimizing $\log(\tilde{p}(\theta|y))$ with respect to $\theta$ using some quasi-Newton method and let $\theta^*$ be the modal configuration. 
 
@@ -259,7 +259,7 @@ For the second challenge, three approximation options are available in the `R-IN
 
 The default approach is to compute a Taylor's expansion up to the third order around the mode of the Laplace approximation, which provides an approximation to the standardized Gaussian approximation and appears to be highly accurate 
 $$
-\log p(x_i|\theta, y) \approx b_i(\theta)x_i -\frac{1}{2}{x_i}^2 + \frac{1}{6}c_i(\theta){x_i}^3
+\log p(x_i|\theta, y) \approx b_i(\theta)x_i -\frac{1}{2}{x_i}^2 + \frac{1}{6}c_i(\theta){x_i}^3.
 $$
 
 The Gaussian option is fast but the assumption is strong so results tend to be poor and the Laplace option works well but is computationally more expensive (Rue et al., 2009, as cited in Morrison, 2017). 
@@ -283,7 +283,7 @@ where $\Gamma$ is the gamma function, $\nu > 0$ is a shape parameter, $\kappa > 
 
 The Matérn covariance function appears naturally in various scientific fields (Guttorp and Gneiting, 2006). GFs $x(u)$ with the covariance function of the form above is a solution to the linear fractional SPDE 
 $$
-{(\kappa^2 - \Delta)}^{\alpha/2} x(u) = W(u), \ \ u \in \mathbb R^d, \\ \alpha = \nu + d/2, \\ \kappa > 0, \ \ \nu > 0 ,
+{(\kappa^2 - \Delta)}^{\alpha/2} x(u) = W(u), \ \ u \in \mathbb R^d, \ \ \alpha = \nu + d/2, \\ \kappa > 0, \ \ \nu > 0 ,
 $$
 where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Delta = \sum_{i=1}^d \frac{\partial^2} {\partial x_i^2}$ is the Laplacian, $W(u)$ is spatial Gaussian white noise, $\nu$ controls the smoothness, and $\kappa$ controls the range (Lindgren et al., 2011; Bolin, 2015). Any solution to the SPDE are named Matérn fields. Interested readers are referred to Lindgren et al.'s (2011) work (*or my dissertation but can't promise yet!*) for details about the SPDE approach. 
 

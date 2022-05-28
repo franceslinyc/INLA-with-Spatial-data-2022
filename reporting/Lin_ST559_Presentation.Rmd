@@ -235,15 +235,307 @@ where $Q$ is the precision matrix ($Q = \Sigma^{-1}$), and conditional independe
 
 ## 4. Additive Models and Gaussian Markov Random Fields
 
+One of the primary reasons why INLA approach is so efficient is that 
+
+- It is able to treat the joint distribution for the latent field $x$ as a GMRF with a precision matrix that is easy to compute. 
+
+- The sparsity of the precision matrix also boosts computational efficiency, compared with operations on dense matrices. 
+
 ## 5. Laplace Approximations
+
+The Laplace approximation (Barndorff-Nielsen & Cox, 1989)
+
+- It is an old technique for the approximation of integrals. 
+
+- The idea is to approximate the Gaussian target by matching the mode and curvature at the mode, and the mode is computed iteratively using a Newton-Raphson method.  
+
+Let $nf(x)$ be the sum of log-likelihoods and $x$ the unknown parameter, the goal is to approximate the integral 
+$$
+I_n = \int_x \exp(n(f(x))) dx 
+$$
+as $n \to \infty$. 
+
+
+## 5. Laplace Approximations
+
+Let $x_0$ be the point in which $f(x)$ has its maximum, then 
+$$
+I_n \approx \int_x \exp(n(f(x_0) + \frac{1}{2} {(x-x_0)}^2 f^{''}(x_0) )) dx 
+$$
+$$
+= \exp(nf(x_0)) \sqrt(\frac{2\pi} {-nf^{''}(x_0)}) = \tilde{I}_n.
+$$
+
+By the central limit theorem, the Gaussian approximation will be exact as $n \to \infty$. The extension to higher-dimensional integrals is also immediate with the errors given as 
+$$
+I_n = \tilde{I}_n(1 + \mathcal{O}(n^{-1})). 
+$$
+
+The error rate is relative with rate $\mathcal{O}(n^{-1})$, as supposed to additive with rate $\mathcal{O}(n^{-1/2})$, which is common in simulation-based inference. 
+
 
 ## INLA 
 
+The INLA approach is designed specifically for the structure of LGMs, where 
+
+(1) the likelihood is conditional independent (i.e., $y_i$ only depends on one $x_i$ and $\theta$), 
+
+(2) $x|\theta$ is a GMRF, and 
+
+(3) $|\theta|$ is low-dimensional. 
+
+For LGMs, the problem can be reformulated as series of subproblems that allows the use of Laplace approximations. 
+
+The exact joint posterior distribution of $x$ and $\theta$ in Section 2.1. is generally difficult to obtain. 
+
+## INLA 
+
+The main goal of Bayesian inference is to approximate the posterior marginals for the hyperparameters and latent field respectively 
+$$
+p(\theta_j|y), j = 1,..., |\theta|, \ \ \ \ \ p(x_i | y), \ i = 1,...,n. 
+$$
+
+The posterior marginals of interest can be written as 
+$$
+p(\theta_j|y) = \int p(\theta|y) d\theta_{-j}, 
+$$
+$$
+p(x_i | y) = \int p(x_i,\theta|y) d\theta = \int p(x_i|\theta,y) p(\theta|y) d\theta, 
+$$
+where $\theta_{-j} = (\theta_1,..., \theta_{j-1}, \theta_{j+1},...)$.
+
+
+## INLA
+
+The key feature of the INLA approach is to use the above form to construct nested approximations 
+$$
+\tilde{p}(\theta_j|y) = \int \tilde{p}(\theta|y) d\theta_{-j}, 
+$$
+$$
+\tilde{p}(x_i | y) = \int \tilde{p}(x_i|\theta,y) \tilde{p}(\theta|y) d\theta, 
+$$
+where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments.
+
+- Approximation to $p(\theta_j|y)$ is computed by integrating out $\theta_{-j}$ from $\tilde{p}(\theta_j|y)$. 
+
+- Approximations to $p(x_i | y)$ are computed by approximating  $p(x_i|\theta,y)$ and $p(\theta|y)$ and using numerical integration to integrate out $\theta$ (Rue et al., 2009). 
+
+## Approximating the Posterior Marginals for the Hyperparameters 
+
+Expanding the numerator and replacing the denominator with a Laplace approximation, then the expression becomes 
+$$
+p(\theta|y) \propto \frac{p(\theta) p(x|\theta)  p(y|x,\theta)} {\tilde{p}{(x|\theta, y)}} \bigg|_{x=x^*(\theta)} = \tilde{p}(\theta|y), 
+$$
+where 
+
+- $\tilde{p}{(x|\theta, y)}$ is the Gaussian approximation to the full conditional of $x$ and 
+
+- $x^*(\theta)$ is the mode of $x$ for a given $\theta$.
+
+
+## Posterior Marginals for the Hyperparameters 
+
+The denominator is approximated using a Gaussian approximation 
+$$
+p{(x|\theta, y)} \propto \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log  (p(y_i|x_i,\theta))) 
+$$
+$$
+= (2\pi)^{-n/2} {|P(\theta)|}^{1/2} \exp(- \frac{1}{2} {(x - \mu(\theta))}^T P(\theta) (x - \mu(\theta))) = \tilde{p}{(x|\theta, y)}, 
+$$
+where 
+
+- $P(\theta) = Q(\theta) + diag(c(\theta))$, 
+
+- $\mu(\theta)$ is the location of the mode, and 
+
+- $c(\theta)$ is the vector that contains the negative second derivative e of the log-likelihood at the mode. 
+
+
+## Posterior Marginals for the Hyperparameters 
+
+To approximate $p(\theta_j|y)$, the following steps are involved (Rue et al., 2009):
+
+1. locate the mode of $\tilde{p}(\theta|y)$ by optimizing $\log(\tilde{p}(\theta|y))$ with respect to $\theta$ using some quasi-Newton method and let $\theta^*$ be the modal configuration. 
+
+2. at the modal configuration $\theta^*$, compute the negative Hessian matrix $H>0$ using finite differences.
+
+3. explore $\log(\tilde{p}(\theta|y))$ to locate the bulk of the probability mass using the z-parameterization.
+
+4. approximate $p(\theta_j|y)$ by using the points that were already computed during steps 1-3 to construct an interpolant to $\log(\tilde{p}(\theta|y))$ and compute marginals using numerical integration such as Newton–Raphson method from this $\log(\tilde{p}(\theta|y))$. 
+
+
+## Approximating the Posterior Marginals for the Latent Field
+
+Approximate the posterior marginals for the latent field is similar but more challenging since the dimension of $x$ can be very large. 
+
+The posterior marginals for the latent field can be expressed as 
+$$
+p(x_i | \theta, y) = \int p(x_i|\theta,y) p(\theta|y) d\theta,
+$$
+
+which results in two challenges: 
+
+1. Integrating over $p(\theta|y)$ is shown to be too computationally costly in Section 3.1.1. since the cost of standard numerical integration is exponential in the dimension of $\theta$. 
+
+2. Approximating $p(x_i|\theta,y)$ for a subset of all $i=1,...,n$ using the Laplace approximation can be too demanding since $n$ can be very large ($10^3$ to $10^5$). 
+
+
+## Posterior Marginals for the Latent Field
+
+For the first challenge, classical numerical integration is restricted to lower dimensions because higher-dimensional integrals can not only be difficult but also impossible. 
+
+To avoid the integration step, 
+
+- Empirical Bayes approach is used, which uses the mode. 
+
+- In dimensions $>2$, ideas were borrowed from central composite design (Box & Wilson, 1951), which uses integration points on a sphere around the center. 
+
+ 
+## Posterior Marginals for the Latent Field 
+
+For the second challenge, three approximation options are available in the `R-INLA` package: 
+
+- the Gaussian approximation,  
+
+- the Laplace approximation, and 
+
+- the simplified Laplace approximation (Rue et al., 2009, as cited in Morrison, 2017). 
+
+
+## Posterior Marginals for the Latent Field 
+
+The default approach is to compute a Taylor's expansion up to the third order around the mode of the Laplace approximation, which provides an approximation to the standardized Gaussian approximation and appears to be highly accurate 
+$$
+\log p(x_i|\theta, y) \approx b_i(\theta)x_i -\frac{1}{2}{x_i}^2 + \frac{1}{6}c_i(\theta){x_i}^3.
+$$
+
+The Gaussian option is fast but the assumption is strong so results tend to be poor and the Laplace option works well but is computationally more expensive (Rue et al., 2009, as cited in Morrison, 2017). 
+
+
 ## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
+
+For certain members of GFs (Gaussian fields) with the Matérn covariance function, the GMRF representation on a triangulated lattice can be constructed explicitly through the use of certain SPDE (stochastic partial differential equation, Lindgren et al., 2011). 
+
+As a result, GMRFs are no longer restricted to lattice (or areal) data. The link between GFs and GMRFs also allows for more realistic spatial statistical modeling.
+
+
+## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
+
+Let $||\cdot||$ denote the Euclidean distance in $\mathbb R^d$, the Matérn covariance function between locations $u$, $v \in \mathbb R^d$ is defined as 
+$$
+C(u,v) = \frac{\sigma^2} {2^{\nu-1} \Gamma(\nu)} {(\kappa_{\nu} ||v-u||)}^{\nu} K_{\nu} (\kappa_{\nu} ||v-u||)
+$$
+$$
+\propto {(\kappa_{\nu} ||v-u||)}^{\nu} K_{\nu} (\kappa_{\nu} ||v-u||), 
+$$
+where $\Gamma$ is the gamma function, $\nu > 0$ is a shape parameter, $\kappa > 0$ is a scaling parameter, and 
+$$
+\sigma^2 = \frac{\Gamma(\nu)} {\Gamma(\nu+d/2) {(4\pi)}^{d/2} \kappa^{2\nu}}
+$$ 
+is the marginal variance, and $K_{\nu}$ is the modified Bessel function of the second kind with order $\nu>0$, $\kappa>0$ (Lindgren et al., 2011). 
+
+## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
+
+The Matérn covariance function appears naturally in various scientific fields (Guttorp and Gneiting, 2006). 
+
+GFs $x(u)$ with the covariance function of the form above is a solution to the linear fractional SPDE 
+$$
+{(\kappa^2 - \Delta)}^{\alpha/2} x(u) = W(u), \ \ u \in \mathbb R^d, \alpha = \nu + d/2, \kappa > 0, \nu > 0,
+$$
+where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Delta = \sum_{i=1}^d \frac{\partial^2} {\partial x_i^2}$ is the Laplacian, $W(u)$ is spatial Gaussian white noise, $\nu$ controls the smoothness, and $\kappa$ controls the range (Lindgren et al., 2011; Bolin, 2015). Any solution to the SPDE are named Matérn fields.
+
+## Discussion
+
+(1)
+
+(2)
+
+(3)
+
+(4) Just like common GP models have previously been shown to linked to GMRFs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). 
 
 ## Spatial Areal Example Using The `R-INLA` Package
 
+The `NY8` data set contains the number of incident leukemia cases per census tract in an eight-country region of upstate New York from 1978-1982 (Waller & Gotway, 2004; Bivand et al., 2008). 
+
+- The `NY8` data set can be accessed from the **R** package `DClusterm`, and it is a `SpatialPolygonsDataFrame` object. 
+
+- A total of 5 models (fixed effects, random effects (iid), ICAR, BYM and Leroux et al.) are fitted, and results include criteria for model selection (marginal log-likelihood, DIC and WAIC). 
+
+## Spatial Areal Example Using The `R-INLA` Package
+
+Results show that for spatially dependent data, spatial models generally perform better than GLM with fixed or random (iid) effects. It is also no surprise that the baseline model (fixed effects model) appears to be the poorest fit of all. 
+
+```{r echo=FALSE, message=FALSE}
+library(here)
+library(tidyverse)
+library(pander)
+library(gridExtra)
+```
+
+```{r echo=FALSE, message=FALSE}
+criteria_df <- readRDS(here("results", "criteria_df.rds"))
+criteria_df %>% pandoc.table(caption = "criteria for model selection") %>% pander
+```
+
 ## Spatial Geostatistical Example Using The `R-INLA` Package
+
+The `meuse` data set contains locations, topsoil heavy metal concentrations and a number of soil and landscape variables at the observed locations in a flood plain of the river Meuse. 
+
+- The `meuse` data set can be accessed from **R** package `gstat`, and it is a `data.frame` object. 
+
+- An universal kriging model and a continuous spatial process with a Matérn covariance function using the INLA-SPDE approach (referred to as the SPDE model) are fitted, and results include summary results and predicted plots of kriging vs SPDE. 
+
+## Spatial Geostatistical Example Using The `R-INLA` Package
+
+Results show that the universal kriging and the SPDE model provide similar estimates. 
+
+- For the fitted variogram model, sill (or variance) $= 0.2053$, nugget (i.e., variance when distance $= 0$) $= 0.07643$, and range $= 728.7$. 
+
+- For the SPDE model, mean variance $= 0.2351$ with $Q1 = 0.183$ and $Q3 = 0.2754$, and max range $= 955.8$ (This value is a bit higher than expected). 
+
+
+## Spatial Geostatistical Example Using The `R-INLA` Package
+
+Both plots show higher estimated means of log-concentrations of zinc at locations closer to the Meuse river. 
+
+```{r echo=FALSE, message=FALSE}
+p_krg <- readRDS(here("results", "p_krg.rds"))
+p_spde <- readRDS(here("results", "p_spde.rds"))
+p_diff <- readRDS(here("results", "p_diff.rds"))
+```
+
+```{r echo=FALSE, message=FALSE}
+grid.arrange(p_krg, p_spde, ncol = 2)
+```
+
+
+## Spatial Geostatistical Example Using The `R-INLA` Package
+
+The differences may be due to the ways how the models were defined and how their model components were specified. 
+
+```{r echo=FALSE, message=FALSE}
+grid.arrange(p_spde, p_diff, ncol = 2)
+```
+
+## Reference 
+
+Lindgren, F., Rue, H., & Lindström, J. (2011). An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 73(4), 423-498.
+
+Morrison, K. (2017). A gentle INLA tutorial. Precision Analytics. https://www.precision-analytics.ca/articles/a-gentle-inla-tutorial/.
+
+Rue, H., Martino, S., & Chopin, N. (2009). Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations. Journal of the royal statistical society: Series b (statistical methodology), 71(2), 319-392.
+
+**Rue, H., Riebler, A., Sørbye, S. H., Illian, J. B., Simpson, D. P., & Lindgren, F. K. (2017). Bayesian computing with INLA: a review. Annual Review of Statistics and Its Application, 4, 395-421.**
+
+
+## Tutorial 
+
+[Gómez-Rubio, V. (2019). R-bloggers. Spatial Data Analysis with INLA. https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/.](https://www.r-bloggers.com/2019/11/spatial-data-analysis-with-inla/)
+
+[Gómez-Rubio, V. (2020). 7.3 Geostatistics. *Bayesian inference with INLA.* CRC Press.](https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#sec:geostats)
+
+[Moraga, P. (2019). 8 Geostatistical data. *Geospatial health data: Modeling and visualization with R-INLA and shiny.* CRC Press.](https://www.paulamoraga.com/book-geospatial/sec-geostatisticaldatatheory.html#spatial-modeling-of-rainfall-in-paraná-brazil)
 
 ## Thank you!
 
