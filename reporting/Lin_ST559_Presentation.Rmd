@@ -529,8 +529,9 @@ grid.arrange(p_krg, p_spde, ncol = 2)
 
 The differences may be due to the ways how the models were defined and how their model components were specified. 
 
-```{r echo=FALSE, message=FALSE}
-grid.arrange(p_spde, p_diff, ncol = 2)
+```{r echo=FALSE, message=FALSE, out.width="45%"}
+#grid.arrange(p_spde, p_diff, ncol = 2)
+p_diff
 ```
 
 ## Reference 
