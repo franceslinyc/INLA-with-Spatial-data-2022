@@ -57,7 +57,10 @@ NY8@data %>% head %>% pander
 # plot(NY8) # Just the map now.
 ```
 
-
+```{r}
+# Check dimension 
+NY8@data %>% dim
+```
 
 
 ## Plotting 
@@ -332,6 +335,7 @@ This one seems a bit complicated. Let's wait till the last or skip it altogether
 
 ```{r}
 # Fit model
+start.time <- Sys.time()
 m_icar <- inla(round(Cases) ~ 1 + AVGIDIST + 
                  f(ID, model = "besag", graph = NY8.mat),
                data = NY8_sf,
@@ -339,6 +343,9 @@ m_icar <- inla(round(Cases) ~ 1 + AVGIDIST +
                E = NY8_sf$Expected,
                control.predictor = list(compute = TRUE),
                control.compute = list(dic = TRUE, waic = TRUE))
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken  # 3.155386 secs
 summary(m_icar)
 ```
 
@@ -372,6 +379,7 @@ The BYM (Besag-York-Mollié) model is a convolution model of an ICAR (intrinsic 
 
 ```{r}
 # Fit model
+start.time <- Sys.time()
 m_bym = inla(round(Cases) ~ 1 + AVGIDIST + 
                f(ID, model = "bym", graph = NY8.mat),
              data = NY8_sf, 
@@ -379,6 +387,9 @@ m_bym = inla(round(Cases) ~ 1 + AVGIDIST +
              E = NY8_sf$Expected, 
              control.predictor = list(compute = TRUE),
              control.compute = list(dic = TRUE, waic = TRUE))
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken # Time difference of 3.797915 secs
 summary(m_bym)
 ```
 

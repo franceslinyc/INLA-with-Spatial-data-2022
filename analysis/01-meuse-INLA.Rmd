@@ -37,6 +37,11 @@ class(meuse)
 meuse %>% head(3) %>% pander
 ```
 
+```{r}
+meuse %>% dim
+```
+
+
 ## Kriging
 
 ### Create a SpatialPointsDataFrame (the `sp` way) and assign CSR
@@ -315,11 +320,15 @@ form <- log(zinc) ~ -1 + Intercept + dist + f(spatial.field, model = spde) # - 1
 
 ```{r}
 # Fit the model
+start.time <- Sys.time()
 m1 <- inla(form, 
            data = inla.stack.data(join.stack, spde = meuse.spde),
            family = "gaussian",
            control.predictor = list(A = inla.stack.A(join.stack), compute = TRUE),
            control.compute = list(cpo = TRUE, dic = TRUE))
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken # Time difference of 9.82935 secs
 ```
 
 According to [this site](https://www.paulamoraga.com/book-geospatial/sec-inla.html), the main arguments of the `inla()` function are 
