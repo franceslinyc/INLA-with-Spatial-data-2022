@@ -181,7 +181,7 @@ $$
 p(\theta_j|y), j = 1,..., |\theta|, \ \ \ \ \ p(x_i | y), \ i = 1,...,n. 
 $$
 
-The posterior marginals of interest can be written as 
+The posterior marginals of (each element of) interest can be obtained by 
 $$
 p(\theta_j|y) = \int p(\theta|y) d\theta_{-j}, 
 $$
@@ -195,7 +195,7 @@ $$
 $$
 \tilde{p}(x_i | y) = \int \tilde{p}(x_i|\theta,y) \tilde{p}(\theta|y) d\theta, 
 $$
-where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments (Rue et al., 2009). Approximation to $p(\theta_j|y)$ is computed by integrating out $\theta_{-j}$ from $\tilde{p}(\theta_j|y)$. Approximations to $p(x_i | y)$ are computed by approximating $p(\theta|y)$ and $p(x_i|\theta,y)$ and using numerical integration to integrate out $\theta$ (Rue et al., 2009). 
+where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments (Rue et al., 2009). Approximation to $p(\theta_j|y)$ is computed by integrating out the remaining parameters $\theta_{-j}$ from $\tilde{p}(\theta|y)$. Approximations to $p(x_i | y)$ are computed by approximating $p(\theta|y)$ and $p(x_i|\theta,y)$ and using numerical integration to integrate out $\theta$ (Rue et al., 2009). 
 
 
 ### 3.1.1. Approximating the Posterior Marginals for the Hyperparameters 
@@ -215,7 +215,7 @@ $$
 p{(x|\theta, y)} \propto \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log  (p(y_i|x_i,\theta))) 
 $$
 $$
-= (2\pi)^{-n/2} {|P(\theta)|}^{1/2} \exp(- \frac{1}{2} {(x - \mu(\theta))}^T P(\theta) (x - \mu(\theta))) = \tilde{p}{(x|\theta, y)}, 
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ = (2\pi)^{-n/2} {|P(\theta)|}^{1/2} \exp(- \frac{1}{2} {(x - \mu(\theta))}^T P(\theta) (x - \mu(\theta))) = \tilde{p}{(x|\theta, y)}, 
 $$
 where $P(\theta) = Q(\theta) + diag(c(\theta))$, $\mu(\theta)$ is the location of the mode, and $c(\theta)$ is the vector that contains the negative second derivative e of the log-likelihood at the mode. 
 
@@ -227,7 +227,7 @@ To approximate $p(\theta_j|y)$, the following steps are involved (Rue et al., 20
 
 3. explore $\log(\tilde{p}(\theta|y))$ to locate the bulk of the probability mass using the z-parameterization.
 
-4. approximate $p(\theta_j|y)$ by using the points that were already computed during steps 1-3 to construct an interpolant to $\log(\tilde{p}(\theta|y))$ and compute marginals using numerical integration such as Newton–Raphson method from this $\log(\tilde{p}(\theta|y))$. 
+4. approximate $p(\theta_j|y)$ by using the points that were already computed during steps 1-3 to construct an interpolant to $\log(\tilde{p}(\theta|y))$ and compute marginals using numerical integration such as Newton–Raphson method from this interpolant. 
 
 Since $|\theta|$ is of low dimension, marginals for $\theta_j|y$ can be derived directly from the approximation to $\theta|y$. 
 
