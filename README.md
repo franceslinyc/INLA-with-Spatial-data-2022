@@ -13,7 +13,7 @@ Report can be found [here](https://github.com/franceslinyc/INLA-with-Spatial-dat
 
 Presentation slides can be found [here](https://github.com/franceslinyc/INLA-with-Spatial-data-2022/blob/main/reporting/Lin_ST559_Presentation.pdf). 
 
-Other reports are in the analysis folder: 
+Other reports are in the analysis folder. 
 
 
 ## Reference
