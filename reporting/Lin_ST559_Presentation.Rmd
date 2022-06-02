@@ -16,7 +16,7 @@ The steps involving the Bayesian inference may appear easy and straightforward:
 
 However, this is much harder to do in practice since solutions in closed-form may not always be determined. 
 
-- MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference in the early 1990s. 
+- MCMC (Markov chain Monte Carlo) represented a breakthrough in Bayesian inference in the early 1990s. 
 
 - Tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed, and 
 
@@ -126,10 +126,10 @@ where $p(\cdot)$ is a known distribution.
 
 Then, the posterior distribution, structured in a hierarchical way, becomes 
 $$
-p(x, \theta | y) \propto p(y|x, \theta) p(x, \theta)
+p(x, \theta | y) \propto p(\theta) p(x | \theta) \prod_{i \in I} p(y_i | x_i, \theta) 
 $$
 $$
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \propto \prod_{i \in I} p(y_i | x_i, \theta) p(x | \theta) p(\theta).
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  \ \ \ \ \ \ \ \ \ \propto p(\theta) {|Q(\theta)|}^{1/2} \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log p(y_i|x_i,\theta)). 
 $$
 
 For computational reasons and to ensure accurate approximations, the following assumptions hold:  
@@ -276,6 +276,8 @@ The error rate is relative with rate $\mathcal{O}(n^{-1})$, as supposed to addit
 
 ## INLA (Integrated Nested Laplace Approximation)
 
+INLA uses a nested version of the Laplace approximation, combined with modern numerical techniques for integration. 
+
 The INLA approach is designed specifically for the structure of LGMs, where 
 
 (1) the likelihood is conditional independent (i.e., $y_i$ only depends on one $x_i$ and $\theta$), 
@@ -413,6 +415,15 @@ $$
 The Gaussian option is fast but the assumption is strong so results tend to be poor and the Laplace option works well but is computationally more expensive (Rue et al., 2009, as cited in Morrison, 2017). 
 
 
+## Approximating the Posterior Marginals for the Latent Field
+
+Then Newton-like methods are used to explore the joint posterior distribution of the hyperparameters to find points for the numerical integration 
+$$
+\tilde{p}(x_i | y) \approx \sum_{h=1}^H \tilde{p}(x_i|\theta^*_h, y) \tilde{p}(\theta^*_h|y) \Delta_h 
+$$
+(Rue et al., 2009, as cited in Morrison, 2017). For the numerical integration here, three options are available: grid search, central composite design, and empirical Bayes (Rue et al., 2009). 
+
+
 ## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
 
 For certain members of GFs (Gaussian fields) with the Matérn covariance function, the GMRF representation on a triangulated lattice can be constructed explicitly through the use of certain SPDE (stochastic partial differential equation, Lindgren et al., 2011). 
@@ -447,13 +458,15 @@ where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Del
 
 ## Discussion 
 
-(1) The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. Due to time constraint, some of the theoretical as well as computational details are mentioned briefly in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs requires its own exploration and examination. 
+(1) The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. Due to time constraint, some of the theoretical as well as computational details are only briefly mentioned in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs requires its own exploration and examination. 
 
-(2) The generality of the package `R-INLA` increases complexity for the user. For this project, the data preprocessing stage for the `meuse` (geostatistical) data is more involved, compared to that for the `NY8` (areal) data. For a restricted set of models, efforts have been done to create packages with a simplified interface. 
+(2) The generality of the package `R-INLA` increases complexity for the user. For a restricted set of models, efforts have been done to create packages with a simplified interface. 
 
 ## Discussion 
 
-(3) Just like common GP models have previously been shown to linked to GMRFs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). 
+(3) For this project, the data preprocessing stage for the `meuse` (geostatistical) data is quite involved, compared to that for the `NY8` (areal) data. Extending its application to a large-scale (or big) data set may be time consuming. 
+
+(4) Just like common GP models have previously been shown to linked to GMRFs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). 
 
 
 ## Spatial Areal Example Using The `R-INLA` Package

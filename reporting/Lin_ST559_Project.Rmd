@@ -12,14 +12,14 @@ header-includes: \usepackage{setspace}\onehalfspacing
 
 The steps involving the Bayesian inference may appear easy and straightforward: updating prior beliefs about the unknown parameters with observed data and obtaining the posterior distribution for the parameters. However, this is much harder to do in practice since solutions in closed-form may not always be found. 
 
-The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) was introduced and represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has quickly gained popularity in many fields. However, while MCMC are asymptotically exact methods, based on sampling, they can not only be computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
+The simulation-based inference through the idea of MCMC (Markov chain Monte Carlo) represented a breakthrough in Bayesian inference (Robert & Casella, 1999) in the early 1990s. MCMC tools such as `WinBugs` (Spiegelhalter et al., 1995), `JAGS` (Plummer, 2016), and `stan` (Stan Development Team, 2015) have also been developed. Bayesian statistics has quickly gained popularity in many fields. However, while MCMC are asymptotically exact methods, they can not only be computationally demanding (i.e. requires a large amount of CPU), but also present convergence issues. 
 
-INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for Bayesian inference for a specific class of models named LGMs (latent Gaussian models). INLA does not require sampling and is a faster but approximate method. INLA uses a nested version ("nested") of the Laplace approximation, combined with modern numerical techniques for integration ("integrated"). INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models), GAMMs (generalized additive mixed models) to time-series, and spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA` (Rue et al., 2017). 
+INLA (integrated nested Laplace approximation) is a fast alternative to MCMC for Bayesian inference for a specific class of models named LGMs (latent Gaussian models). INLA does not require sampling so it is a faster but approximate method. INLA can be applied to a very wide and flexible class of models named LGMs (latent Gaussian models), which ranges from GLMMs (generalized linear mixed models), GAMMs (generalized additive mixed models) to time-series, and spatial and spatio-temporal models. INLA also allows for faster and more accurate inference without trading speed for accuracy, and it is accessible through the **R** package `R-INLA` (Rue et al., 2017). 
 
 
 ### 1.2 Applications 
 
-INLA have found applications in a wide variety of fields. In particular, INLA have found spatial or spatio-temporal applications in fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc.
+INLA have found applications in a wide variety of fields. In particular, INLA have found spatial or spatio-temporal applications in fields such as environment, ecology, disease mapping, medical imaging, public health, cancer research, energy, economics, risk analysis, etc. 
 
 Some selected examples include: environmental risk factors to liver fluke in cattle (Innocent et al., 2017); modelling recovering fish populations (Boudreau et al., 2017); polio-virus eradication in Pakistan (Mercer et al., 2017); cortical surface fMRI data (Mejia et al., 2017); socio-demographic and geographic impact of HPV vaccination (Rutten et al., 2017); topsoil metals and cancer mortality (Lopez-Abente et al., 2017) with spatially misaligned data; ethanol and gasoline pricing (Laurini, 2017); applications in spatial econometrics (Bivand et al., 2014; Gomez-Rubio et al., 2015; Gomez-Rubio et al., 2014); probabilistic prediction of wind power (Lenzi et al., 2017); modeling landslides as point processes (Lombardo et al., 2018); predicting extreme rainfall events in space and time (Opitz et al., 2018), etc.
 
@@ -34,9 +34,7 @@ The posterior distribution is proportional to the likelihood function multiples 
 $$
 p(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} \propto p(y|\theta) p(\theta), 
 $$
-where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. 
-
-Later, we will see that the posterior distribution, structured in a hierarchical way, becomes 
+where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. Later, we will see that the posterior distribution, structured in a hierarchical way, becomes 
 $$
 p(x, \theta | y) \propto p(y|x, \theta) p(x, \theta)
 $$
@@ -44,9 +42,7 @@ $$
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \propto p(y | x, \theta) p(x | \theta) p(\theta).
 $$
 
-Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained. 
-
-However, the integral is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
+Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained. However, the integral is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
 
 
 ### 2.1. Latent Gaussian Models
@@ -75,7 +71,7 @@ $$
 p(x, \theta | y) \propto p(\theta) p(x | \theta) \prod_{i \in I} p(y_i | x_i, \theta) 
 $$
 $$
-\propto p(\theta) {|Q(\theta)|}^{1/2} \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log p(y_i|x_i,\theta)). 
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \propto p(\theta) {|Q(\theta)|}^{1/2} \exp(- \frac{1}{2} x^TQ(\theta)x + \sum_i \log p(y_i|x_i,\theta)). 
 $$
 
 For computational reasons and to ensure accurate approximations, the following assumptions hold:  
@@ -114,9 +110,9 @@ where $Q(\theta)$ is the sparse precision matrix and $|Q(\theta)|$ is its determ
 
 ### 2.3. Gaussian Markov Random Fields
 
-GMRFs (Gaussian Markov Random Fields) provide computational benefit since calculations involving a sparse matrix are much less costly. A GMRF is a random vector that follows a multivariate normal distribution with additional conditional independence properties: for $i \neq j$, $x_i$ and $x_j$ are conditionally independent given the remaining elements $x_{-ij}$, for several $\{i,j\}$s. 
+GMRFs (Gaussian Markov Random Fields) provide computational benefit since calculations involving a sparse matrix are much less costly. 
 
-Undirected graphs $G$ are typically used to represent the conditional independence properties of the GMRF. An undirected graph $G = (V, E)$ consists of a set of nodes $V$ and edges $E$, where $V$ is a set of nodes $\{ 1,...,n \}$ and $E$ is a set of edges $\{i,j\},$ where $i \neq j \in V$ (Bolin, 2015). 
+A GMRF is a random vector that follows a multivariate normal distribution with additional conditional independence properties: for $i \neq j$, $x_i$ and $x_j$ are conditionally independent given the remaining elements $x_{-ij}$, for several $\{i,j\}$s. Undirected graphs $G$ are typically used to represent the conditional independence properties of the GMRF. An undirected graph $G = (V, E)$ consists of a set of nodes $V$ and edges $E$, where $V$ is a set of nodes $\{ 1,...,n \}$ and $E$ is a set of edges $\{i,j\},$ where $i \neq j \in V$ (Bolin, 2015). 
 
 Formally, a random vector $x = {(x_1,...,x_n)}^T \in \mathbb{R}$ is called a GMRF with respect to a labelled graph $G = (V, E)$ with mean $\mu$ and positive definite matrix $Q$ $iff$ its density has the form 
 $$
@@ -178,7 +174,7 @@ This provides two advantages. The error rate is relative with rate $\mathcal{O}(
 
 ### 3.1. INLA 
 
-The INLA approach is designed specifically for the structure of LGMs, where (1) the likelihood is conditional independent (i.e., $y_i$ only depends on one $x_i$ and $\theta$), (2) $x|\theta$ is a GMRF, and (3) $|\theta|$ is low-dimensional. For LGMs, the problem can be reformulated as series of subproblems that allows the use of Laplace approximations. 
+INLA uses a nested version of the Laplace approximation, combined with modern numerical techniques for integration. The INLA approach is designed specifically for the structure of LGMs, where (1) the likelihood is conditional independent (i.e., $y_i$ only depends on one $x_i$ and $\theta$), (2) $x|\theta$ is a GMRF, and (3) $|\theta|$ is low-dimensional. For LGMs, the problem can be reformulated as series of subproblems that allows the use of Laplace approximations. 
 
 The exact joint posterior distribution of $x$ and $\theta$ in Section 2.1. is generally difficult to obtain. The main goal of Bayesian inference is to approximate the posterior marginals for the hyperparameters and latent field respectively 
 $$
@@ -199,7 +195,7 @@ $$
 $$
 \tilde{p}(x_i | y) = \int \tilde{p}(x_i|\theta,y) \tilde{p}(\theta|y) d\theta, 
 $$
-where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments (Rue et al., 2009). Approximation to $p(\theta_j|y)$ is computed by integrating out $\theta_{-j}$ from $\tilde{p}(\theta_j|y)$. Approximations to $p(x_i | y)$ are computed by approximating  $p(x_i|\theta,y)$ and $p(\theta|y)$ and using numerical integration to integrate out $\theta$ (Rue et al., 2009). 
+where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments (Rue et al., 2009). Approximation to $p(\theta_j|y)$ is computed by integrating out $\theta_{-j}$ from $\tilde{p}(\theta_j|y)$. Approximations to $p(x_i | y)$ are computed by approximating $p(\theta|y)$ and $p(x_i|\theta,y)$ and using numerical integration to integrate out $\theta$ (Rue et al., 2009). 
 
 
 ### 3.1.1. Approximating the Posterior Marginals for the Hyperparameters 
@@ -244,9 +240,8 @@ Approximate the posterior marginals for the latent field is similar but more cha
 
 The posterior marginals for the latent field can be expressed as 
 $$
-p(x_i | \theta, y) = \int p(x_i|\theta,y) p(\theta|y) d\theta,
+p(x_i | y) = \int p(x_i|\theta,y) p(\theta|y) d\theta,
 $$
-
 which results in two challenges: 
 
 1. Integrating over $p(\theta|y)$ is shown to be too computationally costly in Section 3.1.1. since the cost of standard numerical integration is exponential in the dimension of $\theta$. 
@@ -257,12 +252,18 @@ For the first challenge, classical numerical integration is restricted to lower 
 
 For the second challenge, three approximation options are available in the `R-INLA` package: the Gaussian, the Laplace, and the simplified Laplace approximation (Rue et al., 2009, as cited in Morrison, 2017). 
 
-The default approach is to compute a Taylor's expansion up to the third order around the mode of the Laplace approximation, which provides an approximation to the standardized Gaussian approximation and appears to be highly accurate 
+The Gaussian option (which is the same step for approximating the denominator of the equation in Section 3.1.2.) is fast but the assumption is strong so results tend to be poor, and the Laplace option for each element in the latent field works well but is computationally more expensive (Rue et al., 2009, as cited in Morrison, 2017). 
+
+The default approach is then to compute a Taylor's expansion up to the third order around the mode of the Laplace approximation, which provides an approximation to the standardized Gaussian approximation and appears to be highly accurate 
 $$
 \log p(x_i|\theta, y) \approx b_i(\theta)x_i -\frac{1}{2}{x_i}^2 + \frac{1}{6}c_i(\theta){x_i}^3.
 $$
 
-The Gaussian option is fast but the assumption is strong so results tend to be poor and the Laplace option works well but is computationally more expensive (Rue et al., 2009, as cited in Morrison, 2017). 
+Then Newton-like methods are used to explore the joint posterior distribution of the hyperparameters to find points for the numerical integration 
+$$
+\tilde{p}(x_i | y) \approx \sum_{h=1}^H \tilde{p}(x_i|\theta^*_h, y) \tilde{p}(\theta^*_h|y) \Delta_h 
+$$
+(Rue et al., 2009, as cited in Morrison, 2017). For the numerical integration here, three options are available: grid search, central composite design, and empirical Bayes (Rue et al., 2009). 
 
 ### 3.1.3. Predictive Criteria 
 
@@ -295,11 +296,11 @@ Just like common GP models have previously been shown to linked to GMRFs (Lindgr
 
 ## 4. Discussion
 
-The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. However, due to time constraint, some of the theoretical as well as computational details are mentioned briefly in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs can be referenced to a list of books and articles and each requires its own exploration and examination. 
+(1) The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. However, due to time constraint, some of the theoretical as well as computational details are only briefly mentioned in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs can be referenced to a list of books and articles and each requires its own exploration and examination. 
 
-The generality of the package `R-INLA` increases complexity for the user. For this project, the data preprocessing stage for the `meuse` (geostatistical) data is more involved, compared to that for the `NY8` (areal) data. For a restricted set of models, efforts have been done to create packages with a simplified interface. 
+(2) The generality of the package `R-INLA` increases complexity for the user. For a restricted set of models, efforts have been done to create packages with a simplified interface. For this project, the exampled data sets used are relatively simple yet the data preprocessing stage for the `meuse` (geostatistical) data is quite involved, compared to that for the `NY8` (areal) data. Extending its application to a large-scale data set may be time consuming. 
 
-Just like common GP models have previously been shown to linked to GMRFs through SPDEs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). Even though of particular interest of mine is the SPDE approach, it is exciting to see that new development such as deep GMRFs has been made. 
+(3) Just like common GP models have previously been shown to linked to GMRFs through SPDEs (Lindgren et al., 2011), a formal connection between GMRFs and CNNs (convolutional neural networks) has recently been established (Sidén & Lindsten, 2020). Even though of particular interest of mine is the SPDE approach, it is exciting to see that effort for new development such as deep GMRFs has continued to be made. 
 
 
 \newpage
@@ -337,6 +338,4 @@ Rue, H., Martino, S., Lindgren, F., Simpson, D., Riebler, A., Krainski, E. T., &
 [Gómez-Rubio, V. (2020). 7.3 Geostatistics. *Bayesian inference with INLA.* CRC Press.](https://becarioprecario.bitbucket.io/inla-gitbook/ch-spatial.html#sec:geostats)
 
 [Moraga, P. (2019). 8 Geostatistical data. *Geospatial health data: Modeling and visualization with R-INLA and shiny.* CRC Press.](https://www.paulamoraga.com/book-geospatial/sec-geostatisticaldatatheory.html#spatial-modeling-of-rainfall-in-paraná-brazil)
-
-
 
