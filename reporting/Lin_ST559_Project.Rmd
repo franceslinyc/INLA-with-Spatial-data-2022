@@ -34,15 +34,17 @@ The posterior distribution is proportional to the likelihood function multiples 
 $$
 p(\theta|y) = \frac{p(y|\theta) p(\theta)} {\int p(y|\theta) p(\theta) d\theta} \propto p(y|\theta) p(\theta), 
 $$
-where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. Later, we will see that the posterior distribution, structured in a hierarchical way, becomes 
+where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${\int p(y|\theta) p(\theta) d\theta}$ is the normalizing constant. 
+
+Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained. However, the (multiple) integral ${\int p(y|\theta) p(\theta) d\theta}$ is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
+
+Later, we will see that the posterior distribution, structured in a hierarchical way, becomes 
 $$
 p(x, \theta | y) \propto p(y|x, \theta) p(x, \theta)
 $$
 $$
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \propto p(y | x, \theta) p(x | \theta) p(\theta).
 $$
-
-Based on the posterior distribution, relevant statistics for the parameters of interest such as marginal distribution, means, variances, quantiles, credibility intervals, etc. can be obtained. However, the integral is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
 
 
 ### 2.1. Latent Gaussian Models
@@ -181,7 +183,7 @@ $$
 p(\theta_j|y), j = 1,..., |\theta|, \ \ \ \ \ p(x_i | y), \ i = 1,...,n. 
 $$
 
-The posterior marginals of (each element of) interest can be obtained by 
+The posterior marginal of (each element of) interest can be obtained by 
 $$
 p(\theta_j|y) = \int p(\theta|y) d\theta_{-j}, 
 $$
@@ -217,7 +219,7 @@ $$
 $$
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ = (2\pi)^{-n/2} {|P(\theta)|}^{1/2} \exp(- \frac{1}{2} {(x - \mu(\theta))}^T P(\theta) (x - \mu(\theta))) = \tilde{p}{(x|\theta, y)}, 
 $$
-where $P(\theta) = Q(\theta) + diag(c(\theta))$, $\mu(\theta)$ is the location of the mode, and $c(\theta)$ is the vector that contains the negative second derivative e of the log-likelihood at the mode. 
+where $P(\theta) = Q(\theta) + diag(c(\theta))$, $\mu(\theta)$ is the location of the mode, and $c(\theta)$ is the vector that contains the negative second derivatives of the log-likelihood at the mode, with respect to $x_i$. 
 
 To approximate $p(\theta_j|y)$, the following steps are involved (Rue et al., 2009):
 
@@ -296,7 +298,7 @@ Just like common GP models have previously been shown to linked to GMRFs (Lindgr
 
 ## 4. Discussion
 
-(1) The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. However, due to time constraint, some of the theoretical as well as computational details are only briefly mentioned in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs can be referenced to a list of books and articles and each requires its own exploration and examination. 
+(1) The INLA approach appears promising for a wide variety of applications because of the model abstraction of the LGMs. However, due to time constraint, some of the theoretical as well as computational details are only briefly mentioned in this project. For example, key component such as GMRFs, Laplace Approximations, or SPDEs can be referred to a list of books and articles and each requires its own exploration and examination. 
 
 (2) The generality of the package `R-INLA` increases complexity for the user. For a restricted set of models, efforts have been done to create packages with a simplified interface. For this project, the exampled data sets used are relatively simple yet the data preprocessing stage for the `meuse` (geostatistical) data is quite involved, compared to that for the `NY8` (areal) data. Extending its application to a large-scale data set may be time consuming. 
 

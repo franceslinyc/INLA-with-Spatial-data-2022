@@ -98,7 +98,7 @@ where $p(y|\theta)$ is the likelihood function, $p(\theta)$ is the prior, and ${
 
 - Based on the posterior distribution, relevant statistics for the parameters of interest (e.g. marginal distribution, means, variances, and credibility intervals) can be obtained. 
 
-- However, the integral is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
+- However, the (multiple) integral ${\int p(y|\theta) p(\theta) d\theta}$ is generally intractable in closed-form, thus requiring the use of numerical methods such as MCMC. 
 
 ## 1. Latent Gaussian Models
 
@@ -352,7 +352,7 @@ where
 
 - $\mu(\theta)$ is the location of the mode, and 
 
-- $c(\theta)$ is the vector that contains the negative second derivative e of the log-likelihood at the mode. 
+- $c(\theta)$ is the vector that contains the negative second derivatives of the log-likelihood at the mode, with respect to $x_i$. 
 
 
 ## Approximating the Posterior Marginals for the Hyperparameters 
@@ -421,7 +421,9 @@ Then Newton-like methods are used to explore the joint posterior distribution of
 $$
 \tilde{p}(x_i | y) \approx \sum_{h=1}^H \tilde{p}(x_i|\theta^*_h, y) \tilde{p}(\theta^*_h|y) \Delta_h 
 $$
-(Rue et al., 2009, as cited in Morrison, 2017). For the numerical integration here, three options are available: grid search, central composite design, and empirical Bayes (Rue et al., 2009). 
+(Rue et al., 2009, as cited in Morrison, 2017). 
+
+For the numerical integration here, three options are available: grid search, central composite design, and empirical Bayes (Rue et al., 2009). 
 
 
 ## INLA-SPDE (Stochastic Partial Differential Equations) Approach 
@@ -454,7 +456,9 @@ GFs $x(u)$ with the covariance function of the form above is a solution to the l
 $$
 {(\kappa^2 - \Delta)}^{\alpha/2} x(u) = W(u), \ \ u \in \mathbb R^d, \alpha = \nu + d/2, \kappa > 0, \nu > 0,
 $$
-where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Delta = \sum_{i=1}^d \frac{\partial^2} {\partial x_i^2}$ is the Laplacian, $W(u)$ is spatial Gaussian white noise, $\nu$ controls the smoothness, and $\kappa$ controls the range (Lindgren et al., 2011; Bolin, 2015). Any solution to the SPDE are named Matérn fields.
+where ${(\kappa^2 - \Delta)}^{\alpha/2}$ is a pseudodifferential operator, $\Delta = \sum_{i=1}^d \frac{\partial^2} {\partial x_i^2}$ is the Laplacian, $W(u)$ is spatial Gaussian white noise, $\nu$ controls the smoothness, and $\kappa$ controls the range (Lindgren et al., 2011; Bolin, 2015). 
+
+Any solution to the SPDE are named Matérn fields.
 
 ## Discussion 
 
@@ -505,10 +509,9 @@ The `meuse` data set contains locations, topsoil heavy metal concentrations and 
 
 Results show that the universal kriging and the SPDE model provide similar estimates. 
 
-- For the fitted variogram model, sill (or variance) $= 0.2053$, nugget (i.e., variance when distance $= 0$) $= 0.07643$, and range $= 728.7$. 
+- For the fitted variogram model, sill (or variance) $= 0.2053$, nugget (i.e., variance when distance $= 0$) $= 0.07643$, and range (i.e. the distance after which the variogram levels off) $= 728.7$. 
 
 - For the SPDE model, mean variance $= 0.2351$ with $Q1 = 0.183$ and $Q3 = 0.2754$, and max range $= 955.8$ (This value is a bit higher than expected). 
-
 
 ## Spatial Geostatistical Example Using The `R-INLA` Package
 
