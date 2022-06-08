@@ -44,6 +44,8 @@ criteria_df %>% pandoc.table(caption = "criteria for model selection") %>% pande
 ```
 
 
+\newpage 
+
 ### A1.2. A Spatial Geostatistical Example of Heavy Metal Concentrations 
 
 The `meuse` data set contains locations, topsoil heavy metal concentrations and a number of soil and landscape variables at the observed locations in a flood plain of the river Meuse. The `meuse` data set can be accessed from **R** package `gstat`, and it is a `data.frame` object. 
