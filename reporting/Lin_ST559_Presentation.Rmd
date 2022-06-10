@@ -315,7 +315,7 @@ $$
 \tilde{p}(\theta_j|y) = \int \tilde{p}(\theta|y) d\theta_{-j}, 
 $$
 $$
-\tilde{p}(x_i | y) = \int \tilde{p}(x_i|\theta,y) \tilde{p}(\theta|y) d\theta, 
+\tilde{p}(x_i | y) = \int \mathbf{\tilde{p}(x_i|\theta,y)} \mathbf{\tilde{p}(\theta|y)} d\theta, 
 $$
 where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arguments.
 
@@ -328,7 +328,7 @@ where $\tilde{p}(\cdot|\cdot)$ is an approximated conditional density of its arg
 
 Expanding the numerator and replacing the denominator with a Laplace approximation, then the expression becomes 
 $$
-p(\theta|y) \propto \frac{p(\theta) p(x|\theta)  p(y|x,\theta)} {\tilde{p}{(x|\theta, y)}} \bigg|_{x=x^*(\theta)} = \tilde{p}(\theta|y), 
+p(\theta|y) \propto \frac{p(\theta) p(x|\theta)  p(y|x,\theta)} {\tilde{p}{(x|\theta, y)}} \bigg|_{x=x^*(\theta)} = \mathbf{\tilde{p}(\theta|y)}, 
 $$
 where 
 
@@ -374,7 +374,7 @@ Approximate the posterior marginals for the latent field is similar but more cha
 
 The posterior marginals for the latent field can be expressed as 
 $$
-p(x_i | \theta, y) = \int p(x_i|\theta,y) p(\theta|y) d\theta,
+p(x_i | y) = \int \mathbf{p(x_i|\theta,y)} \mathbf{p(\theta|y)} d\theta,
 $$
 
 which results in two challenges: 
